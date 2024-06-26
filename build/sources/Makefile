@@ -154,6 +154,30 @@ besselK1.cpp.s:
 	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/besselK1.cpp.s
 .PHONY : besselK1.cpp.s
 
+integrator.o: integrator.cpp.o
+.PHONY : integrator.o
+
+# target to build an object file
+integrator.cpp.o:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/integrator.cpp.o
+.PHONY : integrator.cpp.o
+
+integrator.i: integrator.cpp.i
+.PHONY : integrator.i
+
+# target to preprocess a source file
+integrator.cpp.i:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/integrator.cpp.i
+.PHONY : integrator.cpp.i
+
+integrator.s: integrator.cpp.s
+.PHONY : integrator.s
+
+# target to generate assembly for a file
+integrator.cpp.s:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/integrator.cpp.s
+.PHONY : integrator.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -166,6 +190,9 @@ help:
 	@echo "... besselK1.o"
 	@echo "... besselK1.i"
 	@echo "... besselK1.s"
+	@echo "... integrator.o"
+	@echo "... integrator.i"
+	@echo "... integrator.s"
 .PHONY : help
 
 
