@@ -130,29 +130,29 @@ sources/fast:
 	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/build
 .PHONY : sources/fast
 
-besselK1.o: besselK1.cpp.o
-.PHONY : besselK1.o
+functions.o: functions.cpp.o
+.PHONY : functions.o
 
 # target to build an object file
-besselK1.cpp.o:
-	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/besselK1.cpp.o
-.PHONY : besselK1.cpp.o
+functions.cpp.o:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/functions.cpp.o
+.PHONY : functions.cpp.o
 
-besselK1.i: besselK1.cpp.i
-.PHONY : besselK1.i
+functions.i: functions.cpp.i
+.PHONY : functions.i
 
 # target to preprocess a source file
-besselK1.cpp.i:
-	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/besselK1.cpp.i
-.PHONY : besselK1.cpp.i
+functions.cpp.i:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/functions.cpp.i
+.PHONY : functions.cpp.i
 
-besselK1.s: besselK1.cpp.s
-.PHONY : besselK1.s
+functions.s: functions.cpp.s
+.PHONY : functions.s
 
 # target to generate assembly for a file
-besselK1.cpp.s:
-	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/besselK1.cpp.s
-.PHONY : besselK1.cpp.s
+functions.cpp.s:
+	cd /home/johann/Documents/Projects/hobby/Function_optimization/build && $(MAKE) $(MAKESILENT) -f sources/CMakeFiles/sources.dir/build.make sources/CMakeFiles/sources.dir/functions.cpp.s
+.PHONY : functions.cpp.s
 
 integrator.o: integrator.cpp.o
 .PHONY : integrator.o
@@ -187,9 +187,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... sources"
-	@echo "... besselK1.o"
-	@echo "... besselK1.i"
-	@echo "... besselK1.s"
+	@echo "... functions.o"
+	@echo "... functions.i"
+	@echo "... functions.s"
 	@echo "... integrator.o"
 	@echo "... integrator.i"
 	@echo "... integrator.s"

@@ -1,2 +1,2 @@
-/usr/bin/ar qc libsources.a CMakeFiles/sources.dir/besselK1.cpp.o CMakeFiles/sources.dir/integrator.cpp.o
+/usr/bin/ar qc libsources.a CMakeFiles/sources.dir/functions.cpp.o CMakeFiles/sources.dir/integrator.cpp.o
 /usr/bin/ranlib libsources.a

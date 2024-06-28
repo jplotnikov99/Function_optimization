@@ -1,8 +1,9 @@
 #include <iostream>
-#include "besselK1.hpp"
+#include "include/functions.hpp"
 
 int main(){
-    BesselK1 B1;
-    std::cout << B1(2) << std::endl;
+    Functions B1(besselK1);
+
+    std::cout << B1.res(0.00001) << std::endl;
     return 0;
 }
