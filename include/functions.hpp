@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -11,7 +13,7 @@ enum func_name
     besselK2
 };
 
-class Functions
+class Function
 {
 private:
     func_name name;
@@ -19,11 +21,12 @@ private:
     std::vector<double> c;
     gradient g;
 public:
-    Functions(const func_name n, const double p);
+    Function(const func_name n, const double p);
     // prepares the constants and gradients which we want to optimize for 
     void prepare();
     double res(const double x);
-    ~Functions(){};
+    double eps(const double xi, const double xf);
+    ~Function(){};
 
     // functions that we want to optimize:
     // _exact: exact function
