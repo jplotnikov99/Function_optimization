@@ -58,9 +58,35 @@ double Function::besselK1_appr(const double x)
            pow((c[0] * pow(x, c0 / 5) + c[1] * pow(x, c0 / 4) + c[2] * pow(x, c0 / 3) + c[3] * pow(x, c0 / 2) + pow(2 * x / M_PI, c0) + 1), 1 / (2 * c0));
 }
 
-bool Function::besselK1_check()
+bool Function::besselK1_valid()
 {
+    const double c0 = 1.984;
+    bool passed = true;
+    double den;
+    if (c[0] < 0)
+        return false;
+    for (double x = 1e-2; x < 10; x += 1e-2)
+    {
+        den = c[0] * pow(x, c0 / 5) + c[1] * pow(x, c0 / 4) + c[2] * pow(x, c0 / 3) +
+              c[3] * pow(x, c0 / 2) + pow(2 * x / M_PI, c0) + 1;
+        if (den < 0)
+            passed = false;
+    }
+    return passed;
+}
+
+bool Function::is_valid()
+{
+    switch (name)
+    {
+    case besselK1:
+        return besselK1_valid();
+        break;
     
+    default:
+        exit(1);
+        break;
+    }
 }
 
 double Function::res(const double x)
@@ -73,7 +99,6 @@ double Function::res(const double x)
     case besselK1:
         exact = besselK1_exact(x);
         appr = besselK1_appr(x);
-        std::cout << appr << std::endl;
         break;
     case test:
         break;

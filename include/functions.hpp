@@ -19,19 +19,20 @@ class Function
 {
 private:
     func_name name;
-    double p_value; 
+    double p_value;
     std::vector<double> c;
     gradient g;
+
 public:
     Function(const func_name n, const double p);
-    // prepares the constants and gradients which we want to optimize for 
+    // prepares the constants and gradients which we want to optimize for
     double get_p_value();
     size_t get_N_constants();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
     void prepare();
     double res(const double x);
-    double eps(const double xi, const double xf);
+    bool is_valid();
     ~Function(){};
 
     // functions that we want to optimize:
@@ -41,7 +42,6 @@ public:
     // _grad: gradient with respect to the constants we want to optimize
     double besselK1_exact(double x);
     double besselK1_appr(double x);
-    bool besselK1_check();
+    bool besselK1_valid();
     gradient besselK1_grad(double x);
-    
 };

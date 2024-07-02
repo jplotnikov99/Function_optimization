@@ -15,17 +15,30 @@ double Optimizer::get_min_epsilon()
 double Optimizer::epsilon()
 {
     double p = I->F->get_p_value();
-    return pow(I->adap_gauss_kronrod_15(xi, xf), 1 / p);
+    return pow(I->integrate(xi, xf), 1 / p);
 }
 
-void Optimizer::monte_carlo(const double lower, const double upper, const size_t N)
+void Optimizer::monte_carlo(const std::vector<double> lower, const std::vector<double> upper, const size_t N)
 {
+    assert(lower.size() == upper.size());
+    bool passed;
     double cur_epsilon;
+
     for (size_t i = 0; i < N; i++)
     {
-        I->F->randomize_constants(lower, upper);
-        cur_epsilon = epsilon();
-        if (cur_epsilon < min_epsilon)
-            min_epsilon = cur_epsilon;
+        for (size_t j = 0; j < lower.size(); j++)
+            I->F->change_constant(j, generate_random(lower.at(j), upper.at(j)));
+
+        passed = I->F->is_valid();
+        if (passed)
+        {
+            cur_epsilon = epsilon();
+            if (cur_epsilon < min_epsilon)
+                min_epsilon = cur_epsilon;
+        }
+        else
+        {
+            i--;
+        }
     }
 }

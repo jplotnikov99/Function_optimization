@@ -19,6 +19,9 @@ private:
 public:
    std::unique_ptr<Function> F;
    Integrator(std::unique_ptr<Function> &function, const int_method m);
-   double adap_gauss_kronrod_15(double l, double r, const double err = 1e-6);
+   double kronrod_61(const double l, const double r);
+   double adap_gauss_kronrod_15(double l, double r, const double appr, const double err = 1e-5);
+
+   double integrate(const double l, const double r, const double err = 1e-5);
    ~Integrator(){};
 };

@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
+#include <cassert>
 #include "integrator.hpp"
 
 class Optimizer
@@ -14,6 +16,6 @@ public:
     Optimizer(std::unique_ptr<Integrator> &Inte, const double start, const double finish);
     double get_min_epsilon();
     double epsilon();
-    void monte_carlo(const double lower, const double upper, const size_t N);
+    void monte_carlo(const std::vector<double> lower, const std::vector<double> upper, const size_t N);
     ~Optimizer(){};
 };
