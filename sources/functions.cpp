@@ -7,25 +7,6 @@ Function::Function(const func_name n, const double p)
     prepare();
 }
 
-double Function::get_p_value()
-{
-    return p_value;
-}
-
-void Function::change_constant(const size_t i, const double new_val)
-{
-    assert(i < c.size());
-    c[i] = new_val;
-}
-
-void Function::randomize_constants(const double l, const double r)
-{
-    for (auto &it : c)
-    {
-        it = generate_random(l, r);
-    }
-}
-
 void Function::prepare()
 {
     size_t NC;
@@ -43,6 +24,35 @@ void Function::prepare()
     for (size_t i = 0; i < NC; i++)
     {
         c.push_back(0);
+    }
+}
+
+double Function::get_p_value()
+{
+    return p_value;
+}
+
+std::vector<double> Function::get_constants()
+{
+    return c;
+}
+
+size_t Function::get_N_c()
+{
+    return c.size();
+}
+
+void Function::change_constant(const size_t i, const double new_val)
+{
+    assert(i < c.size());
+    c[i] = new_val;
+}
+
+void Function::randomize_constants(const double l, const double r)
+{
+    for (auto &it : c)
+    {
+        it = generate_random(l, r);
     }
 }
 
@@ -82,7 +92,7 @@ bool Function::is_valid()
     case besselK1:
         return besselK1_valid();
         break;
-    
+
     default:
         exit(1);
         break;

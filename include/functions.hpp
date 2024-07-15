@@ -26,11 +26,12 @@ private:
 public:
     Function(const func_name n, const double p);
     // prepares the constants and gradients which we want to optimize for
+    void prepare();
     double get_p_value();
-    size_t get_N_constants();
+    std::vector<double> get_constants();
+    size_t get_N_c();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
-    void prepare();
     double res(const double x);
     bool is_valid();
     ~Function(){};
