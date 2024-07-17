@@ -1,9 +1,11 @@
 #include "integrator.hpp"
 
-Integrator::Integrator(std::unique_ptr<Function> &function, const int_method m)
+Integrator::Integrator(std::unique_ptr<Function> &function, const int_method m, const double x_ini, const double x_fin)
 {
     F = std::move(function);
     method = m;
+    xi = x_ini;
+    xf = x_fin;
 }
 
 double Integrator::kronrod_61(const double l, const double r)
@@ -44,15 +46,15 @@ double Integrator::adap_gauss_kronrod_15(double l, double r, const double appr, 
     return adap_gauss_kronrod_15(l, m, appr, err) + adap_gauss_kronrod_15(m, r, appr, err);
 }
 
-double Integrator::integrate(const double l, const double r, const double err)
+double Integrator::integrate(const double err)
 {
     switch (method)
     {
     case gauss15:
     {
-        double approx = kronrod_61(l, l + 1e-3);
-        approx += kronrod_61(l + 1e-3, r);
-        return adap_gauss_kronrod_15(l, r, approx, err);
+        double approx = kronrod_61(xi, xi + 1e-3);
+        approx += kronrod_61(xi + 1e-3, xf);
+        return adap_gauss_kronrod_15(xi, xf, approx, err);
     }
     break;
 
