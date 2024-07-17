@@ -7,6 +7,7 @@
 
 int main()
 {
+    clock_t begin_time = clock();
 
     srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
@@ -19,13 +20,16 @@ int main()
 
     std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo, up);
 
-    O->monte_carlo(lo, up, 100);
+    O->monte_carlo(100);
 
     std::vector<double> opt_c = O->get_opt_coeffs();
 
     O->randomize_coeffs();
 
     O->print_grid();
+
+    std::cout << "Computation time:\n"
+              << float(clock() - begin_time) / CLOCKS_PER_SEC << "\n";
 
     return 0;
 }
