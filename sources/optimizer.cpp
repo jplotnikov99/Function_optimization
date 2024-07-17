@@ -3,12 +3,25 @@
 Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, const vec1d &upper)
 {
     I = std::move(inte);
-    N_coeffs = I->F->get_N_c();
+    N_coeffs = I->F->get_N_coeffs();
     assert(N_coeffs == lower.size());
     assert(N_coeffs == upper.size());
 
     disjoint_spaces.push_back(lower);
     disjoint_spaces.push_back(upper);
+}
+
+void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
+{
+    disjoint_spaces.push_back(lower);
+    disjoint_spaces.push_back(upper);
+    N_spaces++;
+}
+
+double Optimizer::epsilon()
+{
+    double p = I->F->get_p_value();
+    return pow(I->integrate(), 1 / p);
 }
 
 double Optimizer::get_min_epsilon()
@@ -19,12 +32,6 @@ double Optimizer::get_min_epsilon()
 vec1d Optimizer::get_opt_coeffs()
 {
     return opt_coeffs;
-}
-
-double Optimizer::epsilon()
-{
-    double p = I->F->get_p_value();
-    return pow(I->integrate(), 1 / p);
 }
 
 void Optimizer::update_grid()
@@ -38,9 +45,8 @@ void Optimizer::update_grid()
         XX XX
         XX XX
     */
-    const size_t N_disjoint_spaces = disjoint_spaces.size() / 2;
     weights.clear();
-    for (size_t i = 0; i < N_coeffs * N_disjoint_spaces; i++)
+    for (size_t i = 0; i < N_coeffs * N_spaces; i++)
     {
         weights.push_back({});
         for (size_t j = 0; j < N_bins; j++)
@@ -52,7 +58,6 @@ void Optimizer::update_grid()
 
 void Optimizer::print_grid_row(const size_t i)
 {
-    assert(i < I->F->get_N_c());
     for (auto it : weights.at(i))
     {
         std::cout << it << "\t";
@@ -62,14 +67,17 @@ void Optimizer::print_grid_row(const size_t i)
 
 void Optimizer::print_grid()
 {
-    for (size_t i = 0; i < I->F->get_N_c(); i++)
-        print_grid_row(i);
+    for (size_t i = 0; i < N_spaces; i++)
+    {
+        std::cout << "---------------------------------------" << std::endl;
+        for (size_t j = i * N_coeffs; j < (i + 1) * N_coeffs; j++)
+            print_grid_row(j);
+    }
 }
 
 size_t Optimizer::randomize_coeffs()
 {
-    const size_t N_disjoint_spaces = disjoint_spaces.size() / 2;
-    const size_t space = std::floor(generate_random(0., (double)N_disjoint_spaces));
+    const size_t space = std::floor(generate_random(0., (double)N_spaces));
 
     for (size_t i = 0; i < N_coeffs; i++)
         I->F->change_constant(i, generate_random(disjoint_spaces[2 * space][i], disjoint_spaces[2 * space + 1][i]));
@@ -77,52 +85,73 @@ size_t Optimizer::randomize_coeffs()
     return space;
 }
 
-void Optimizer::set_weight(const size_t space, const vec1d &constants, const double eps)
+vec1d Optimizer::set_weight(const size_t space, const vec1d &constants, const double eps)
 {
-    size_t index{};
+    vec1d res(N_coeffs + 2);
+    size_t i1 = N_coeffs * space;
+    size_t i2;
 
     for (size_t i = 0; i < N_coeffs; i++)
     {
-        // index = (xi-x0)*Nb/(xf-xi) - 1 + space*Nc
-        index = std::ceil((constants.at(i) - disjoint_spaces[2 * space][i]) * (double)N_bins /
-                          (disjoint_spaces[2 * space + 1][i] - disjoint_spaces[2 * space][i])) -
-                1 + space * N_coeffs;
-        weights[i][index] = weights[i][index] == 0 ? eps : std::min(weights[i][index], eps);
+        // index = (xi-x0)*Nb/(xf-xi) - 1
+        i2 = std::ceil((constants.at(i) - disjoint_spaces[2 * space][i]) * (double)N_bins /
+                       (disjoint_spaces[2 * space + 1][i] - disjoint_spaces[2 * space][i])) -
+             1;
+        weights[i1 + i][i2] = weights[i1 + i][i2] == 0 ? eps : std::min(weights[i1 + i][i2], eps);
+        res[i] = i2;
     }
+    res[N_coeffs] = space;
+    res[N_coeffs + 1] = eps;
+
+    return res;
 }
 
-void Optimizer::monte_carlo(const size_t N)
+vec2d Optimizer::monte_carlo(const size_t N, const size_t N_new_spaces)
 {
-    bool passed;
+    vec2d res(N_new_spaces, vec1d(N_coeffs + 2, 1e100));
     double cur_epsilon;
-    vec1d cur_c;
-
-    update_grid();
-
+    vec1d cur_coeffs;
+    vec1d cur_weight;
     for (size_t i = 0; i < N; i++)
     {
         size_t space = randomize_coeffs();
-        passed = I->F->is_valid();
-        if (passed)
+        if (I->F->is_valid())
         {
-            cur_c = I->F->get_constants();
+            cur_coeffs = I->F->get_coeffs();
             cur_epsilon = epsilon();
-            set_weight(space, cur_c, cur_epsilon);
-
+            cur_weight = set_weight(space, cur_coeffs, cur_epsilon);
             if (cur_epsilon < min_epsilon)
             {
-                opt_coeffs = cur_c;
+                opt_coeffs = cur_coeffs;
                 min_epsilon = cur_epsilon;
             }
+            size_t l = N_new_spaces;
+            for (int j = N_new_spaces - 1; j >= 0; j--)
+            {
+                if (cur_weight[N_coeffs + 1] < res[j][N_coeffs + 1])
+                {
+                    l = j;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (l != N_new_spaces)
+                res[l] = cur_weight;
         }
         else
         {
             i--;
         }
     }
+    return res;
 }
 
-void Optimizer::eliminate_weak_grids(const size_t keepers)
+void Optimizer::make_new_spaces(const vec2d &grids)
 {
-    assert(keepers < N_bins);
+    for(auto it : grids)
+    {
+        
+    }
 }

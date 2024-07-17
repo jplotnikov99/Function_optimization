@@ -32,12 +32,12 @@ double Function::get_p_value()
     return p_value;
 }
 
-std::vector<double> Function::get_constants()
+std::vector<double> Function::get_coeffs()
 {
     return c;
 }
 
-size_t Function::get_N_c()
+size_t Function::get_N_coeffs()
 {
     return c.size();
 }

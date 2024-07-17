@@ -28,8 +28,8 @@ public:
     // prepares the constants and gradients which we want to optimize for
     void prepare();
     double get_p_value();
-    std::vector<double> get_constants();
-    size_t get_N_c();
+    std::vector<double> get_coeffs();
+    size_t get_N_coeffs();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
     double res(const double x);
