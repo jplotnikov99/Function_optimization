@@ -100,6 +100,41 @@ double Function::res(const double x)
     return pow(fabs(appr / exact - 1), p_value);
 }
 
+vec1d Function::grad(const double x, const int coeff)
+{
+    assert(coeff < (int)get_N_coeffs());
+    assert((p_value % 2) == 0);
+
+    double exact{0};
+    double approx{0};
+    vec1d deriv;
+
+    switch (name)
+    {
+    case besselK1:
+        exact = besselK1_exact(x);
+        approx = besselK1_appr(x);
+        deriv = besselK1_grad(x);
+        break;
+    case test:
+        break;
+
+    default:
+        break;
+    }
+    double outer = pow(approx / exact - 1., p_value - 1);
+    if (coeff != -1)
+        return {outer * deriv[coeff] / exact};
+
+    vec1d res;
+    for (auto &it : deriv)
+    {
+        res.push_back(outer * it / exact);
+        std::cout << outer * it / exact << "\n";
+    }
+    return res;
+}
+
 double Function::besselK1_exact(const double x)
 {
     return std::cyl_bessel_k(1, x);

@@ -19,7 +19,7 @@ class Function
 {
 private:
     func_name name;
-    double p_value;
+    size_t p_value;
     std::vector<double> c;
     vec1d g;
 
@@ -34,7 +34,7 @@ public:
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
     double res(const double x);
-    double grad(const double x);
+    vec1d grad(const double x, const int coeff = -1);
     bool is_valid();
     ~Function(){};
 

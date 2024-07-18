@@ -11,7 +11,11 @@ int main()
 
     srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
-    std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 3);
+    std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 2);
+
+    F->randomize_constants(0, 2);
+    F->grad(2);
+    exit(0);
 
     std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 150);
 
