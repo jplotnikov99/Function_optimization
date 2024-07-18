@@ -34,6 +34,7 @@ public:
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
     double res(const double x);
+    double grad(const double x);
     bool is_valid();
     ~Function(){};
 
@@ -42,8 +43,8 @@ public:
     // _appr: approximate function
     // _check: checks conditions the constants have to fulfill
     // _grad: gradient with respect to the constants we want to optimize
-    double besselK1_exact(double x);
-    double besselK1_appr(double x);
+    double besselK1_exact(const double x);
+    double besselK1_appr(const double x);
     bool besselK1_valid();
-    vec1d besselK1_grad(double x);
+    vec1d besselK1_grad(const double x);
 };

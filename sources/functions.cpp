@@ -45,7 +45,7 @@ size_t Function::get_N_coeffs()
 void Function::print_coeffs()
 {
     std::cout << "Current coefficents:\n";
-    for(auto &it : c)
+    for (auto &it : c)
     {
         std::cout << it << "\t";
     }
@@ -127,9 +127,25 @@ bool Function::besselK1_valid()
     return passed;
 }
 
-vec1d Function::besselK1_grad(double x)
+vec1d Function::besselK1_grad(const double x)
 {
     vec1d res;
+
+    double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
+                 c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
+    double e = exp(x);
+    double pre = (1 + 1 / x);
+
+    double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
+                   (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
+    den = pow(den, 1 / (2 * c[0]) + 1);
+    pre = e * pre / (den * 2 * c[0]);
+    double dFdc1 = pre * pow(x, c[0] / 5);
+    double dFdc2 = pre * pow(x, c[0] / 4);
+    double dFdc3 = pre * pow(x, c[0] / 3);
+    double dFdc4 = pre * pow(x, c[0] / 2);
+
+    res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4};
 
     return res;
 }
