@@ -15,18 +15,22 @@ private:
     std::unique_ptr<Integrator> I;
     double min_epsilon = 1e100;
     size_t N_coeffs;
-    size_t N_bins = 10, N_spaces = 1;
-    vec2d disjoint_spaces;
+    size_t N_bins = 50, N_spaces = 1;
+    vec2d coefficent_spaces;
     vec2d weights;
     std::vector<double> opt_coeffs;
 
 public:
     Optimizer(std::unique_ptr<Integrator> &Inte, const vec1d &lower, const vec1d &upper);
     void add_space(const vec1d &lower, const vec1d &upper);
+    void print_space();
     double epsilon();
     double get_min_epsilon();
     std::vector<double> get_opt_coeffs();
+
+    //clear weights and update the vector size of the weights for new coefficent space
     void update_grid();
+
     void print_grid_row(const size_t i);
     void print_grid();
 
@@ -37,7 +41,7 @@ public:
     vec1d set_weight(const size_t space, const vec1d &constants, const double eps);
 
     //returns the best N_new_spaces bins for the coefficient and their epsilon value 
-    vec2d monte_carlo(const size_t N, const size_t N_new_spaces = 1);
+    void monte_carlo(const size_t N, const size_t N_new_spaces = 1);
 
     void make_new_spaces(const vec2d &grids);
 

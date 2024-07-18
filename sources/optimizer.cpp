@@ -7,15 +7,27 @@ Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, cons
     assert(N_coeffs == lower.size());
     assert(N_coeffs == upper.size());
 
-    disjoint_spaces.push_back(lower);
-    disjoint_spaces.push_back(upper);
+    coefficent_spaces.push_back(lower);
+    coefficent_spaces.push_back(upper);
 }
 
 void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
 {
-    disjoint_spaces.push_back(lower);
-    disjoint_spaces.push_back(upper);
+    coefficent_spaces.push_back(lower);
+    coefficent_spaces.push_back(upper);
     N_spaces++;
+}
+
+void Optimizer::print_space()
+{
+    for (auto &it : coefficent_spaces)
+    {
+        for (auto &jt : it)
+        {
+            std::cout << jt << "\t";
+        }
+        std::cout << "\n";
+    }
 }
 
 double Optimizer::epsilon()
@@ -36,7 +48,7 @@ vec1d Optimizer::get_opt_coeffs()
 
 void Optimizer::update_grid()
 {
-    /* weights data structure example for 2 bins, 3 coeffs, 2 disjoint_spaces
+    /* weights data structure example for 2 bins, 3 coeffs, 2 coefficent_spaces
         XX XX
         XX XX
         XX XX
@@ -80,7 +92,7 @@ size_t Optimizer::randomize_coeffs()
     const size_t space = std::floor(generate_random(0., (double)N_spaces));
 
     for (size_t i = 0; i < N_coeffs; i++)
-        I->F->change_constant(i, generate_random(disjoint_spaces[2 * space][i], disjoint_spaces[2 * space + 1][i]));
+        I->F->change_constant(i, generate_random(coefficent_spaces[2 * space][i], coefficent_spaces[2 * space + 1][i]));
 
     return space;
 }
@@ -94,8 +106,8 @@ vec1d Optimizer::set_weight(const size_t space, const vec1d &constants, const do
     for (size_t i = 0; i < N_coeffs; i++)
     {
         // index = (xi-x0)*Nb/(xf-xi) - 1
-        i2 = std::ceil((constants.at(i) - disjoint_spaces[2 * space][i]) * (double)N_bins /
-                       (disjoint_spaces[2 * space + 1][i] - disjoint_spaces[2 * space][i])) -
+        i2 = std::ceil((constants.at(i) - coefficent_spaces[2 * space][i]) * (double)N_bins /
+                       (coefficent_spaces[2 * space + 1][i] - coefficent_spaces[2 * space][i])) -
              1;
         weights[i1 + i][i2] = weights[i1 + i][i2] == 0 ? eps : std::min(weights[i1 + i][i2], eps);
         res[i] = i2;
@@ -106,7 +118,32 @@ vec1d Optimizer::set_weight(const size_t space, const vec1d &constants, const do
     return res;
 }
 
-vec2d Optimizer::monte_carlo(const size_t N, const size_t N_new_spaces)
+void Optimizer::make_new_spaces(const vec2d &grids)
+{
+    vec1d lo, up;
+    vec2d new_spaces;
+    double xN, x0, del;
+    for (auto it : grids)
+    {
+        for (size_t i = 0; i < N_coeffs; i++)
+        {
+            xN = coefficent_spaces[2 * it[N_coeffs + 1] + 1][i];
+            x0 = coefficent_spaces[2 * it[N_coeffs + 1]][i];
+            del = (xN - x0) / N_bins;
+            lo.push_back(x0 + it[i] * del);
+            up.push_back(x0 + (it[i] + 1) * del);
+        }
+        new_spaces.push_back(lo);
+        new_spaces.push_back(up);
+        lo.clear();
+        up.clear();
+    }
+    coefficent_spaces = new_spaces;
+    N_spaces = grids.size();
+    update_grid();
+}
+
+void Optimizer::monte_carlo(const size_t N, const size_t N_new_spaces)
 {
     vec2d res(N_new_spaces, vec1d(N_coeffs + 2, 1e100));
     double cur_epsilon;
@@ -145,13 +182,5 @@ vec2d Optimizer::monte_carlo(const size_t N, const size_t N_new_spaces)
             i--;
         }
     }
-    return res;
-}
-
-void Optimizer::make_new_spaces(const vec2d &grids)
-{
-    for(auto it : grids)
-    {
-        
-    }
+    make_new_spaces(res);
 }
