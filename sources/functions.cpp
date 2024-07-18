@@ -13,7 +13,7 @@ void Function::prepare()
     switch (name)
     {
     case besselK1:
-        NC = 4;
+        NC = 5;
         break;
 
     default:
@@ -42,6 +42,16 @@ size_t Function::get_N_coeffs()
     return c.size();
 }
 
+void Function::print_coeffs()
+{
+    std::cout << "Current coefficents:\n";
+    for(auto &it : c)
+    {
+        std::cout << it << "\t";
+    }
+    std::cout << "\n";
+}
+
 void Function::change_constant(const size_t i, const double new_val)
 {
     assert(i < c.size());
@@ -54,35 +64,6 @@ void Function::randomize_constants(const double l, const double r)
     {
         it = generate_random(l, r);
     }
-}
-
-double Function::besselK1_exact(const double x)
-{
-    return std::cyl_bessel_k(1, x);
-}
-
-double Function::besselK1_appr(const double x)
-{
-    const double c0 = 1.984;
-    return exp(-x) * (1 + 1 / x) /
-           pow((c[0] * pow(x, c0 / 5) + c[1] * pow(x, c0 / 4) + c[2] * pow(x, c0 / 3) + c[3] * pow(x, c0 / 2) + pow(2 * x / M_PI, c0) + 1), 1 / (2 * c0));
-}
-
-bool Function::besselK1_valid()
-{
-    const double c0 = 1.984;
-    bool passed = true;
-    double den;
-    if (c[0] < 0)
-        return false;
-    for (double x = 1e-2; x < 10; x += 1e-2)
-    {
-        den = c[0] * pow(x, c0 / 5) + c[1] * pow(x, c0 / 4) + c[2] * pow(x, c0 / 3) +
-              c[3] * pow(x, c0 / 2) + pow(2 * x / M_PI, c0) + 1;
-        if (den < 0)
-            passed = false;
-    }
-    return passed;
 }
 
 bool Function::is_valid()
@@ -117,4 +98,38 @@ double Function::res(const double x)
         break;
     }
     return pow(fabs(appr / exact - 1), p_value);
+}
+
+double Function::besselK1_exact(const double x)
+{
+    return std::cyl_bessel_k(1, x);
+}
+
+double Function::besselK1_appr(const double x)
+{
+    return exp(-x) * (1 + 1 / x) /
+           pow((c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) + c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1), 1 / (2 * c[0]));
+}
+
+bool Function::besselK1_valid()
+{
+    bool passed = true;
+    double den;
+    if (c[0] < 0)
+        return false;
+    for (double x = 1e-2; x < 10; x += 1e-2)
+    {
+        den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
+              c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
+        if (den < 0)
+            passed = false;
+    }
+    return passed;
+}
+
+vec1d Function::besselK1_grad(double x)
+{
+    vec1d res;
+
+    return res;
 }

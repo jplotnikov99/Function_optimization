@@ -13,24 +13,20 @@ int main()
     std::cout << std::setprecision(4);
     std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 3);
 
-    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 100);
+    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 150);
 
-    std::vector<double> lo1 = {0, -2, -2, -2};
-    std::vector<double> up1 = {2, 2, 2, 2};
+    std::vector<double> lo1 = {1, 0, -2, -2, -2};
+    std::vector<double> up1 = {3, 2, 2, 2, 2};
 
     std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo1, up1);
     O->update_grid();
     vec2d res;
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < 6; i++)
     {
         std::cout << i << "\n";
-        O->monte_carlo(10000, 4);
+        O->monte_carlo(10000, 10);
         std::cout << "Best epsilon value: " << O->get_min_epsilon() << std::endl;
     }
-    O->monte_carlo(10000);
-    O->print_space();
-    O->monte_carlo(100000);
-
 
     std::cout << std::setprecision(16);
     std::cout << "Best epsilon value: " << O->get_min_epsilon() << "\n\n";

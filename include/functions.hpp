@@ -6,7 +6,7 @@
 #include <cassert>
 #include "utils.hpp"
 
-typedef std::vector<double> gradient;
+typedef std::vector<double> vec1d;
 
 enum func_name
 {
@@ -21,7 +21,7 @@ private:
     func_name name;
     double p_value;
     std::vector<double> c;
-    gradient g;
+    vec1d g;
 
 public:
     Function(const func_name n, const double p);
@@ -30,6 +30,7 @@ public:
     double get_p_value();
     std::vector<double> get_coeffs();
     size_t get_N_coeffs();
+    void print_coeffs();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
     double res(const double x);
@@ -44,5 +45,5 @@ public:
     double besselK1_exact(double x);
     double besselK1_appr(double x);
     bool besselK1_valid();
-    gradient besselK1_grad(double x);
+    vec1d besselK1_grad(double x);
 };
