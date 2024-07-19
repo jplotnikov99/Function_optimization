@@ -23,6 +23,6 @@ public:
    double kronrod_61(const double l, const double r);
    double adap_gauss_kronrod_15(double l, double r, const double appr, const double err = 1e-5);
 
-   double integrate(const double err = 1e-5);
+   double integrate(const bool is_grad = false, const double err = 1e-5);
    ~Integrator(){};
 };

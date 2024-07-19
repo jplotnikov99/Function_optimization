@@ -80,7 +80,7 @@ bool Function::is_valid()
     }
 }
 
-double Function::res(const double x)
+double Function::res(const double x, const bool is_grad, const int coeff)
 {
     double exact{0};
     double appr{0};
@@ -130,7 +130,6 @@ vec1d Function::grad(const double x, const int coeff)
     for (auto &it : deriv)
     {
         res.push_back(outer * it / exact);
-        std::cout << outer * it / exact << "\n";
     }
     return res;
 }

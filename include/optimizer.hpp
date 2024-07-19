@@ -6,8 +6,6 @@
 #include <cassert>
 #include "integrator.hpp"
 
-typedef std::vector<double> vec1d;
-typedef std::vector<vec1d> vec2d;
 
 class Optimizer
 {
@@ -23,8 +21,10 @@ private:
 public:
     Optimizer(std::unique_ptr<Integrator> &Inte, const vec1d &lower, const vec1d &upper);
     void add_space(const vec1d &lower, const vec1d &upper);
+    void reset_space();
     void print_space();
     double epsilon();
+    vec1d grad_epsilon(const int coeff = -1);
     double get_min_epsilon();
     std::vector<double> get_opt_coeffs();
 
@@ -40,10 +40,14 @@ public:
     // return the bin for each coefficient, the space they are in and their epsilon value
     vec1d set_weight(const size_t space, const vec1d &constants, const double eps);
 
-    //returns the best N_new_spaces bins for the coefficient and their epsilon value 
+    // makes new search spaces with grids that have the smallest weight
+    void make_new_spaces(const vec2d &grids);
+
+    // returns the best N_new_spaces bins for the coefficient and their epsilon value 
     void monte_carlo(const size_t N, const size_t N_new_spaces = 1);
 
-    void make_new_spaces(const vec2d &grids);
+    // does a montecarlo search with N_points and N_loops keeping the best N_new_spaces each time
+    void repeated_monte_carlo(const size_t N_points, const size_t N_loops, const size_t N_new_spaces);
 
     ~Optimizer(){};
 };

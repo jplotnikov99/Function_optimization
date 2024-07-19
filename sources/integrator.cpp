@@ -46,7 +46,7 @@ double Integrator::adap_gauss_kronrod_15(double l, double r, const double appr, 
     return adap_gauss_kronrod_15(l, m, appr, err) + adap_gauss_kronrod_15(m, r, appr, err);
 }
 
-double Integrator::integrate(const double err)
+double Integrator::integrate(const bool is_grad, const double err)
 {
     switch (method)
     {

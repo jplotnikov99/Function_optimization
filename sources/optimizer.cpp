@@ -9,6 +9,7 @@ Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, cons
 
     coefficent_spaces.push_back(lower);
     coefficent_spaces.push_back(upper);
+    update_grid();
 }
 
 void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
@@ -16,6 +17,12 @@ void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
     coefficent_spaces.push_back(lower);
     coefficent_spaces.push_back(upper);
     N_spaces++;
+}
+
+void Optimizer::reset_space()
+{
+    coefficent_spaces.clear();
+    N_spaces = 0;
 }
 
 void Optimizer::print_space()
@@ -34,6 +41,15 @@ double Optimizer::epsilon()
 {
     double p = I->F->get_p_value();
     return pow(I->integrate(), 1 / p);
+}
+
+vec1d Optimizer::grad_epsilon(const int coeff)
+{
+    double p = I->F->get_p_value();
+    double outer = pow(I->integrate(), 1 / p - 1);
+    if (coeff != -1)
+    {
+    }
 }
 
 double Optimizer::get_min_epsilon()
@@ -183,4 +199,28 @@ void Optimizer::monte_carlo(const size_t N, const size_t N_new_spaces)
         }
     }
     make_new_spaces(res);
+}
+
+void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops, const size_t N_new_spaces)
+{
+    double best_eps = min_epsilon;
+    vstring header;
+
+    for (size_t i = 0; i < N_coeffs; i++)
+    {
+        header.push_back("c" + std::to_string(i));
+    }
+    header.push_back("eps");
+
+    for (size_t i = 0; i < N_loops; i++)
+    {
+        monte_carlo(N_points, N_new_spaces);
+        std::cout << "Iteration: " << i + 1 << ". Min epsilon value: " << get_min_epsilon() << "\n";
+    }
+    if (best_eps > min_epsilon)
+    {
+        vec1d data = opt_coeffs;
+        data.push_back(min_epsilon);
+        save_data("mydata.dat", header, data);
+    }
 }

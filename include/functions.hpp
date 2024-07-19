@@ -6,8 +6,6 @@
 #include <cassert>
 #include "utils.hpp"
 
-typedef std::vector<double> vec1d;
-
 enum func_name
 {
     test,
@@ -33,7 +31,7 @@ public:
     void print_coeffs();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
-    double res(const double x);
+    double res(const double x, const bool is_grad = false, const int coeff = -1);
     vec1d grad(const double x, const int coeff = -1);
     bool is_valid();
     ~Function(){};
