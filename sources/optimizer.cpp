@@ -39,17 +39,23 @@ void Optimizer::print_space()
 
 double Optimizer::epsilon()
 {
+    I->switch_to_res();
     double p = I->F->get_p_value();
     return pow(I->integrate(), 1 / p);
 }
 
 vec1d Optimizer::grad_epsilon(const int coeff)
 {
+    vec1d res;
     double p = I->F->get_p_value();
+    I->switch_to_res();
     double outer = pow(I->integrate(), 1 / p - 1);
-    if (coeff != -1)
+    I->switch_to_grad();
+    for (size_t i = 0; i < N_coeffs; i++)
     {
+        res.push_back(I->integrate(i));
     }
+    return outer * res;
 }
 
 double Optimizer::get_min_epsilon()
@@ -222,5 +228,16 @@ void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops
         vec1d data = opt_coeffs;
         data.push_back(min_epsilon);
         save_data("mydata.dat", header, data);
+    }
+}
+
+void Optimizer::gradient_descent()
+{
+    const double RATE = 1;
+    vec1d cur_coeff = I->F->get_coeffs();
+    vec1d grad = grad_epsilon();
+    for(size_t i = 0; i < N_coeffs; i++)
+    {
+        I->F->change_constant(i, cur_coeff[i] - RATE * grad[i]);
     }
 }

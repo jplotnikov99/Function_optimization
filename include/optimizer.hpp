@@ -49,5 +49,7 @@ public:
     // does a montecarlo search with N_points and N_loops keeping the best N_new_spaces each time
     void repeated_monte_carlo(const size_t N_points, const size_t N_loops, const size_t N_new_spaces);
 
+    void gradient_descent();
+
     ~Optimizer(){};
 };

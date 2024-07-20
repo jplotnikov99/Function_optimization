@@ -32,7 +32,7 @@ double Function::get_p_value()
     return p_value;
 }
 
-std::vector<double> Function::get_coeffs()
+vec1d Function::get_coeffs()
 {
     return c;
 }
@@ -80,8 +80,37 @@ bool Function::is_valid()
     }
 }
 
-double Function::res(const double x, const bool is_grad, const int coeff)
+double Function::grad(const double x, const size_t c_i)
 {
+    assert(c_i < c.size());
+    assert((p_value % 2) == 0);
+
+    double exact{0};
+    double approx{0};
+    double deriv;
+
+    switch (name)
+    {
+    case besselK1:
+        exact = besselK1_exact(x);
+        approx = besselK1_appr(x);
+        deriv = besselK1_grad(x, c_i);
+        break;
+    case test:
+        break;
+
+    default:
+        break;
+    }
+    double outer = pow(approx / exact - 1., p_value - 1);
+    return outer * deriv / exact;
+}
+
+double Function::res(const double x, const bool is_grad, const size_t c_i)
+{
+    if (is_grad)
+        return grad(x, c_i);
+
     double exact{0};
     double appr{0};
 
@@ -98,40 +127,6 @@ double Function::res(const double x, const bool is_grad, const int coeff)
         break;
     }
     return pow(fabs(appr / exact - 1), p_value);
-}
-
-vec1d Function::grad(const double x, const int coeff)
-{
-    assert(coeff < (int)get_N_coeffs());
-    assert((p_value % 2) == 0);
-
-    double exact{0};
-    double approx{0};
-    vec1d deriv;
-
-    switch (name)
-    {
-    case besselK1:
-        exact = besselK1_exact(x);
-        approx = besselK1_appr(x);
-        deriv = besselK1_grad(x);
-        break;
-    case test:
-        break;
-
-    default:
-        break;
-    }
-    double outer = pow(approx / exact - 1., p_value - 1);
-    if (coeff != -1)
-        return {outer * deriv[coeff] / exact};
-
-    vec1d res;
-    for (auto &it : deriv)
-    {
-        res.push_back(outer * it / exact);
-    }
-    return res;
 }
 
 double Function::besselK1_exact(const double x)
@@ -161,13 +156,13 @@ bool Function::besselK1_valid()
     return passed;
 }
 
-vec1d Function::besselK1_grad(const double x)
+double Function::besselK1_grad(const double x, const size_t c_i)
 {
-    vec1d res;
+    vec1d temp, res;
 
     double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
                  c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
-    double e = exp(x);
+    double e = exp(-x);
     double pre = (1 + 1 / x);
 
     double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
@@ -181,5 +176,5 @@ vec1d Function::besselK1_grad(const double x)
 
     res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4};
 
-    return res;
+    return res[c_i];
 }

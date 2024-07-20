@@ -18,7 +18,7 @@ class Function
 private:
     func_name name;
     size_t p_value;
-    std::vector<double> c;
+    vec1d c;
     vec1d g;
 
 public:
@@ -26,13 +26,13 @@ public:
     // prepares the constants and gradients which we want to optimize for
     void prepare();
     double get_p_value();
-    std::vector<double> get_coeffs();
+    vec1d get_coeffs();
     size_t get_N_coeffs();
     void print_coeffs();
     void change_constant(const size_t i, const double new_val);
     void randomize_constants(const double l, const double r);
-    double res(const double x, const bool is_grad = false, const int coeff = -1);
-    vec1d grad(const double x, const int coeff = -1);
+    double grad(const double x, const size_t c_i);
+    double res(const double x, const bool is_grad = false, const size_t c_i = 0);
     bool is_valid();
     ~Function(){};
 
@@ -44,5 +44,5 @@ public:
     double besselK1_exact(const double x);
     double besselK1_appr(const double x);
     bool besselK1_valid();
-    vec1d besselK1_grad(const double x);
+    double besselK1_grad(const double x, const size_t c_i);
 };

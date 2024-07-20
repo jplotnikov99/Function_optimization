@@ -12,13 +12,27 @@ int main()
     srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
     std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 2);
-
-    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 150);
+    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 100);
 
     std::vector<double> lo1 = {1, 0, -2, -2, -2};
     std::vector<double> up1 = {3, 2, 2, 2, 2};
-
     std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo1, up1);
+
+    O->randomize_coeffs();
+    std::cout << O->epsilon() << "\n";
+    O->gradient_descent();
+    std::cout << O->epsilon() << "\n";
+    O->gradient_descent();
+    std::cout << O->epsilon() << "\n";
+    O->gradient_descent();
+    std::cout << O->epsilon() << "\n";
+    O->gradient_descent();
+    std::cout << O->epsilon() << "\n";
+    O->gradient_descent();
+    std::cout << O->epsilon() << "\n";
+
+    exit(1);
+
     for (size_t i = 0; i < 1000; i++)
     {
         std::cout << "Generation: " << i << "\n";

@@ -7,6 +7,42 @@ double generate_random(const double a, const double b)
     return a + (b - a) * random;
 }
 
+vec1d operator+(const vec1d a, const vec1d b)
+{
+    assert(a.size() == b.size());
+    vec1d res;
+    for (size_t i = 0; i < a.size(); i++)
+        res.push_back(a[i] + b[i]);
+    return res;
+}
+
+vec1d operator-(const vec1d a, const vec1d b)
+{
+    assert(a.size() == b.size());
+    vec1d res;
+    for (size_t i = 0; i < a.size(); i++)
+        res.push_back(a[i] - b[i]);
+    return res;
+}
+
+vec1d operator*(const double a, const vec1d b)
+{
+    vec1d res;
+    for (auto it : b)
+        res.push_back(a * it);
+    return res;
+}
+
+vec1d operator/(const vec1d a, const double b)
+{
+    vec1d res;
+    for (auto it : a)
+    {
+        res.push_back(it / b);
+    }
+    return res;
+}
+
 bool first_save = true;
 void save_data(const std::string &output_file, const vstring &header, const vec1d &data)
 {
