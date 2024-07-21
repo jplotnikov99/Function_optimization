@@ -24,8 +24,8 @@ public:
    void switch_to_res();
    Integrator(std::unique_ptr<Function> &function, const int_method m, const double x_ini, const double x_fin);
    double kronrod_61(const double l, const double r, const size_t c_i = 0);
-   double adap_gauss_kronrod_15(double l, double r, const double appr, const size_t c_i = 0, const double err = 1e-5);
+   double adap_gauss_kronrod_15(double l, double r, const double appr, const size_t c_i = 0, const double err = 1e-10);
 
-   double integrate(const size_t c_i = 0, const double err = 1e-6);
+   double integrate(const size_t c_i = 0, const double err = 1e-10);
    ~Integrator(){};
 };

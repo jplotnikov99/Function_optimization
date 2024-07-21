@@ -12,6 +12,16 @@ Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, cons
     update_grid();
 }
 
+vec1d Optimizer::get_cur_coeffs()
+{
+    return I->F->get_coeffs();
+}
+
+void Optimizer::change_coeff(const size_t c_i, const double new_val)
+{
+    I->F->change_constant(c_i, new_val);
+}
+
 void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
 {
     coefficent_spaces.push_back(lower);
@@ -51,6 +61,12 @@ vec1d Optimizer::grad_epsilon(const int coeff)
     I->switch_to_res();
     double outer = pow(I->integrate(), 1 / p - 1);
     I->switch_to_grad();
+
+    if (coeff != -1)
+    {
+        return {outer * I->integrate((size_t)coeff)};
+    }
+
     for (size_t i = 0; i < N_coeffs; i++)
     {
         res.push_back(I->integrate(i));
@@ -231,13 +247,20 @@ void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops
     }
 }
 
-void Optimizer::gradient_descent()
+void Optimizer::gradient_descent(const int coeff)
 {
-    const double RATE = 1;
+    const double RATE = 0.1;
     vec1d cur_coeff = I->F->get_coeffs();
-    vec1d grad = grad_epsilon();
-    for(size_t i = 0; i < N_coeffs; i++)
+    vec1d grad = grad_epsilon(coeff);
+    if (coeff != -1)
     {
-        I->F->change_constant(i, cur_coeff[i] - RATE * grad[i]);
+        I->F->change_constant(coeff, cur_coeff[coeff] - RATE * grad[0]);
+    }
+    else
+    {
+        for (size_t i = 0; i < N_coeffs; i++)
+        {
+            I->F->change_constant(i, cur_coeff[i] - RATE * grad[i]);
+        }
     }
 }

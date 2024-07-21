@@ -9,7 +9,7 @@ int main()
 {
     clock_t begin_time = clock();
 
-    srand((unsigned)time(NULL));
+    // srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
     std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 2);
     std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 100);
@@ -19,17 +19,15 @@ int main()
     std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo1, up1);
 
     O->randomize_coeffs();
-    std::cout << O->epsilon() << "\n";
-    O->gradient_descent();
-    std::cout << O->epsilon() << "\n";
-    O->gradient_descent();
-    std::cout << O->epsilon() << "\n";
-    O->gradient_descent();
-    std::cout << O->epsilon() << "\n";
-    O->gradient_descent();
-    std::cout << O->epsilon() << "\n";
-    O->gradient_descent();
-    std::cout << O->epsilon() << "\n";
+    vstring header = {"coeff_val", "res", "grad"};
+    size_t i1 = 5;
+    for (double i = 1; i < 3; i += 0.001)
+    {
+        O->gradient_descent();
+        vec1d res = O->get_cur_coeffs();
+        res.push_back(O->epsilon());
+        save_data("test3.dat", header, res);
+    }
 
     exit(1);
 

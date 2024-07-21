@@ -168,7 +168,7 @@ double Function::besselK1_grad(const double x, const size_t c_i)
     double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
                    (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
     den = pow(den, 1 / (2 * c[0]) + 1);
-    pre = e * pre / (den * 2 * c[0]);
+    pre = -e * pre / (den * 2 * c[0]);
     double dFdc1 = pre * pow(x, c[0] / 5);
     double dFdc2 = pre * pow(x, c[0] / 4);
     double dFdc3 = pre * pow(x, c[0] / 3);
