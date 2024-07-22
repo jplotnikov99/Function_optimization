@@ -43,6 +43,16 @@ vec1d operator/(const vec1d a, const double b)
     return res;
 }
 
+double vabs(const vec1d &a)
+{
+    double res = 0.;
+    for (auto it : a)
+    {
+        res += (it * it);
+    }
+    return sqrt(res);
+}
+
 bool first_save = true;
 void save_data(const std::string &output_file, const vstring &header, const vec1d &data)
 {

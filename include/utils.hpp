@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <cassert>
 #include <vector>
 
@@ -22,5 +23,7 @@ vec1d operator-(const vec1d a, const vec1d b);
 vec1d operator*(const double a, const vec1d b);
 
 vec1d operator/(const vec1d a, const double b);
+
+double vabs(const vec1d &a);
 
 void save_data(const std::string &output_file, const vstring &header, const vec1d &data);

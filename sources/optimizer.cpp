@@ -1,7 +1,15 @@
 #include "optimizer.hpp"
 
-Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, const vec1d &upper)
+Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const vec1d &lower, const vec1d &upper,
+                     const std::string file_name)
 {
+    save_file = file_name;
+    for (size_t i = 0; i < N_coeffs; i++)
+    {
+        header.push_back("c" + std::to_string(i));
+    }
+    header.push_back("eps");
+
     I = std::move(inte);
     N_coeffs = I->F->get_N_coeffs();
     assert(N_coeffs == lower.size());
@@ -19,7 +27,17 @@ vec1d Optimizer::get_cur_coeffs()
 
 void Optimizer::change_coeff(const size_t c_i, const double new_val)
 {
-    I->F->change_constant(c_i, new_val);
+    I->F->change_coeff(c_i, new_val);
+}
+
+void Optimizer::set_opt_coeffs()
+{
+    I->F->change_all_coeffs(opt_coeffs);
+}
+
+vec1d Optimizer::get_opt_coeffs()
+{
+    return opt_coeffs;
 }
 
 void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
@@ -31,6 +49,8 @@ void Optimizer::add_space(const vec1d &lower, const vec1d &upper)
 
 void Optimizer::reset_space()
 {
+    min_epsilon = 1e100;
+    opt_coeffs.clear();
     coefficent_spaces.clear();
     N_spaces = 0;
 }
@@ -79,11 +99,6 @@ double Optimizer::get_min_epsilon()
     return min_epsilon;
 }
 
-vec1d Optimizer::get_opt_coeffs()
-{
-    return opt_coeffs;
-}
-
 void Optimizer::update_grid()
 {
     /* weights data structure example for 2 bins, 3 coeffs, 2 coefficent_spaces
@@ -130,7 +145,7 @@ size_t Optimizer::randomize_coeffs()
     const size_t space = std::floor(generate_random(0., (double)N_spaces));
 
     for (size_t i = 0; i < N_coeffs; i++)
-        I->F->change_constant(i, generate_random(coefficent_spaces[2 * space][i], coefficent_spaces[2 * space + 1][i]));
+        I->F->change_coeff(i, generate_random(coefficent_spaces[2 * space][i], coefficent_spaces[2 * space + 1][i]));
 
     return space;
 }
@@ -228,12 +243,6 @@ void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops
     double best_eps = min_epsilon;
     vstring header;
 
-    for (size_t i = 0; i < N_coeffs; i++)
-    {
-        header.push_back("c" + std::to_string(i));
-    }
-    header.push_back("eps");
-
     for (size_t i = 0; i < N_loops; i++)
     {
         monte_carlo(N_points, N_new_spaces);
@@ -243,24 +252,38 @@ void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops
     {
         vec1d data = opt_coeffs;
         data.push_back(min_epsilon);
-        save_data("mydata.dat", header, data);
+        save_data(save_file, header, data);
     }
 }
 
-void Optimizer::gradient_descent(const int coeff)
+vec1d Optimizer::gradient_descent(const int coeff)
 {
-    const double RATE = 0.1;
-    vec1d cur_coeff = I->F->get_coeffs();
-    vec1d grad = grad_epsilon(coeff);
-    if (coeff != -1)
+    const double RATE = 0.01, ACCURACY = 1e-4;
+    double cur_eps = epsilon(), old_eps;
+    const size_t MAX_IT = 10000;
+    size_t CUR_IT = 0;
+    vec1d cur_coeff, grad;
+    do
     {
-        I->F->change_constant(coeff, cur_coeff[coeff] - RATE * grad[0]);
-    }
-    else
-    {
-        for (size_t i = 0; i < N_coeffs; i++)
+        old_eps = cur_eps;
+        cur_coeff = I->F->get_coeffs();
+        grad = grad_epsilon(coeff);
+
+        if (coeff != -1)
         {
-            I->F->change_constant(i, cur_coeff[i] - RATE * grad[i]);
+            I->F->change_coeff(coeff, cur_coeff[coeff] - RATE * grad[0]);
         }
-    }
+        else
+        {
+            for (size_t i = 0; i < N_coeffs; i++)
+            {
+                I->F->change_all_coeffs(cur_coeff - RATE * grad);
+            }
+        }
+        cur_eps = epsilon();
+        CUR_IT++;
+    } while ((fabs((cur_eps - old_eps) / old_eps) > ACCURACY) && (CUR_IT < MAX_IT) && (cur_eps < old_eps));
+    cur_coeff.push_back(cur_eps);
+    save_data(save_file, header, cur_coeff);
+    return cur_coeff;
 }

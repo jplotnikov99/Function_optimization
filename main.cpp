@@ -9,42 +9,36 @@ int main()
 {
     clock_t begin_time = clock();
 
-    // srand((unsigned)time(NULL));
+    srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
-    std::unique_ptr<Function> F = std::make_unique<Function>(besselK1, 2);
-    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 100);
+    std::unique_ptr<Function> F = std::make_unique<Function>(besselK2, 4);
+    size_t NC = F->get_N_coeffs();
+    std::unique_ptr<Integrator> I = std::make_unique<Integrator>(F, gauss15, 0, 200);
 
-    std::vector<double> lo1 = {1, 0, -2, -2, -2};
-    std::vector<double> up1 = {3, 2, 2, 2, 2};
-    std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo1, up1);
+    std::vector<double> lo1 = {1.8, 0, -2, -2, 0, 2};
+    std::vector<double> up1 = {2.2, 2, 2, 2, 2, 3};
+    std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(I, lo1, up1, "besselK2_run1.dat");
 
-    O->randomize_coeffs();
-    vstring header = {"coeff_val", "res", "grad"};
-    size_t i1 = 5;
-    for (double i = 1; i < 3; i += 0.001)
-    {
-        O->gradient_descent();
-        vec1d res = O->get_cur_coeffs();
-        res.push_back(O->epsilon());
-        save_data("test3.dat", header, res);
-    }
+    vec1d best_generation(NC), cur_generation;
+    best_generation.push_back(1e100);
 
-    exit(1);
-
-    for (size_t i = 0; i < 1000; i++)
+    for (size_t i = 0; i < 100; i++)
     {
         std::cout << "Generation: " << i << "\n";
         std::cout << "-------------------------------------\n";
         O->repeated_monte_carlo(1000, 5, 4);
+        O->set_opt_coeffs();
+        cur_generation = O->gradient_descent();
+        if (cur_generation.back() < best_generation.back())
+        {
+            best_generation = cur_generation;
+        }
         O->reset_space();
         O->add_space(lo1, up1);
     }
 
     std::cout << std::setprecision(16);
-    std::cout << "Best epsilon value: " << O->get_min_epsilon() << "\n\n";
-    std::vector<double> opt_c = O->get_opt_coeffs();
-    std::cout << "Optimal coefficents:\n";
-    for (auto it : opt_c)
+    for (auto it : best_generation)
     {
         std::cout << it << "\n";
     }

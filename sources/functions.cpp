@@ -15,6 +15,9 @@ void Function::prepare()
     case besselK1:
         NC = 5;
         break;
+    case besselK2:
+        NC = 6;
+        break;
 
     default:
         break;
@@ -52,10 +55,18 @@ void Function::print_coeffs()
     std::cout << "\n";
 }
 
-void Function::change_constant(const size_t i, const double new_val)
+void Function::change_coeff(const size_t i, const double new_val)
 {
     assert(i < c.size());
+    grad_map.clear();
     c[i] = new_val;
+}
+
+void Function::change_all_coeffs(const vec1d &new_vals)
+{
+    assert(new_vals.size() == c.size());
+    grad_map.clear();
+    c = new_vals;
 }
 
 void Function::randomize_constants(const double l, const double r)
@@ -71,6 +82,9 @@ bool Function::is_valid()
     switch (name)
     {
     case besselK1:
+        return besselK1_valid();
+        break;
+    case besselK2:
         return besselK1_valid();
         break;
 
@@ -96,6 +110,11 @@ double Function::grad(const double x, const size_t c_i)
         approx = besselK1_appr(x);
         deriv = besselK1_grad(x, c_i);
         break;
+    case besselK2:
+        exact = besselK2_exact(x);
+        approx = besselK2_appr(x);
+        deriv = besselK2_grad(x, c_i);
+        break;
     case test:
         break;
 
@@ -120,7 +139,9 @@ double Function::res(const double x, const bool is_grad, const size_t c_i)
         exact = besselK1_exact(x);
         appr = besselK1_appr(x);
         break;
-    case test:
+    case besselK2:
+        exact = besselK2_exact(x);
+        appr = besselK2_appr(x);
         break;
 
     default:
@@ -158,23 +179,92 @@ bool Function::besselK1_valid()
 
 double Function::besselK1_grad(const double x, const size_t c_i)
 {
-    vec1d temp, res;
+    vec1d res;
+    if (grad_map.count(x) == 0)
+    {
+        vec1d temp;
 
-    double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
-                 c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
-    double e = exp(-x);
-    double pre = (1 + 1 / x);
+        double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
+                     c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
+        double e = exp(-x);
+        double pre = (1 + 1 / x);
 
-    double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
-                   (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
-    den = pow(den, 1 / (2 * c[0]) + 1);
-    pre = -e * pre / (den * 2 * c[0]);
-    double dFdc1 = pre * pow(x, c[0] / 5);
-    double dFdc2 = pre * pow(x, c[0] / 4);
-    double dFdc3 = pre * pow(x, c[0] / 3);
-    double dFdc4 = pre * pow(x, c[0] / 2);
+        double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
+                       (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
+        den = pow(den, 1 / (2 * c[0]) + 1);
+        pre = -e * pre / (den * 2 * c[0]);
+        double dFdc1 = pre * pow(x, c[0] / 5);
+        double dFdc2 = pre * pow(x, c[0] / 4);
+        double dFdc3 = pre * pow(x, c[0] / 3);
+        double dFdc4 = pre * pow(x, c[0] / 2);
 
-    res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4};
+        res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4};
+        grad_map[x] = res;
+    }
+    else
+    {
+        res = grad_map[x];
+    }
+
+    return res[c_i];
+}
+
+double Function::besselK2_exact(const double x)
+{
+    return std::cyl_bessel_k(2, x);
+}
+
+double Function::besselK2_appr(const double x)
+{
+    return exp(-x) * (1 + c[5] / x + 2 / (x * x)) /
+           pow((c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) + c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1), 1 / (2 * c[0]));
+}
+
+bool Function::besselK2_valid()
+{
+    bool passed = true;
+    double den;
+    if (c[0] < 0)
+        return false;
+    for (double x = 1e-2; x < 10; x += 1e-2)
+    {
+        den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
+              c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
+        if (den < 0)
+            passed = false;
+    }
+    return passed;
+}
+
+double Function::besselK2_grad(const double x, const size_t c_i)
+{
+    vec1d res;
+    if (grad_map.count(x) == 0)
+    {
+        vec1d temp;
+
+        double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
+                     c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
+        double e = exp(-x);
+        double pre = (1 + c[5] / x + 2 / (x * x));
+
+        double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
+                       (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
+        double dFdc5 = e / x / (pow(den, 1 / (2 * c[0])));
+        den = pow(den, 1 / (2 * c[0]) + 1);
+        pre = -e * pre / (den * 2 * c[0]);
+        double dFdc1 = pre * pow(x, c[0] / 5);
+        double dFdc2 = pre * pow(x, c[0] / 4);
+        double dFdc3 = pre * pow(x, c[0] / 3);
+        double dFdc4 = pre * pow(x, c[0] / 2);
+
+        res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4, dFdc5};
+        grad_map[x] = res;
+    }
+    else
+    {
+        res = grad_map[x];
+    }
 
     return res[c_i];
 }
