@@ -8,6 +8,8 @@
 int main()
 {
     clock_t begin_time = clock();
+
+    // srand((unsigned)time(NULL));
     std::cout << std::setprecision(4);
     BesselK1 B1(4);
     std::unique_ptr<Integrator> I2 = std::make_unique<Integrator>(gauss15, 0., 150.);
@@ -21,7 +23,8 @@ int main()
     {
         std::cout << "Generation: " << i << "\n";
         std::cout << "-------------------------------------\n";
-        O2->repeated_monte_carlo(B1, 1000, 4, 1);
+        cur_generation = O2->repeated_monte_carlo(B1, 10000, 2, 1);
+        B1.change_all_coeffs(cur_generation);
         cur_generation = O2->gradient_descent(B1);
         if (cur_generation.back() < best_generation.back())
         {

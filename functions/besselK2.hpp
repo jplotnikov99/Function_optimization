@@ -2,14 +2,14 @@
 
 #include "function.hpp"
 
-class BesselK1 : public Function
+class BesselK2 : public Function
 {
 private:
 
 public:
-    BesselK1(const size_t p)
+    BesselK2(const size_t p)
     {
-        N_coeffs = 5;
+        N_coeffs = 6;
         p_value = p;
         for (size_t i = 0; i < N_coeffs; i++)
         {
@@ -17,11 +17,11 @@ public:
         }
     };
 
-    double besselK1_exact(const double x);
-    double besselK1_appr(const double x);
-    double besselK1_grad(const double x);
+    double besselK2_exact(const double x);
+    double besselK2_appr(const double x);
+    double besselK2_grad(const double x);
     bool is_valid();
 
     double operator()(const double x);
-    ~BesselK1() {};
+    ~BesselK2() {};
 };

@@ -1,17 +1,17 @@
-#include "besselK1.hpp"
+#include "besselK2.hpp"
 
-double BesselK1::besselK1_exact(const double x)
+double BesselK2::besselK2_exact(const double x)
 {
-    return std::cyl_bessel_k(1, x);
+    return std::cyl_bessel_k(2, x);
 }
 
-double BesselK1::besselK1_appr(const double x)
+double BesselK2::besselK2_appr(const double x)
 {
-    return exp(-x) * (1 + 1 / x) /
+    return exp(-x) * (1 + c[5] / x + 2 / (x * x)) /
            pow((c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) + c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1), 1 / (2 * c[0]));
 }
 
-double BesselK1::besselK1_grad(const double x)
+double BesselK2::besselK2_grad(const double x)
 {
     vec1d res;
     vec1d temp;
@@ -19,10 +19,11 @@ double BesselK1::besselK1_grad(const double x)
     double den = c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) +
                  c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1;
     double e = exp(-x);
-    double pre = (1 + 1 / x);
+    double pre = (1 + c[5] / x + 2 / (x * x));
 
     double dFdc0 = 1 / (2 * c[0] * c[0]) * e * pre / pow(den, 1 / (2 * c[0])) *
                    (-c[0] * (log(x) * (12 * c[1] * pow(x, c[0] / 5) + 15 * c[2] * pow(x, c[0] / 4) + 20 * c[3] * pow(x, c[0] / 3) + 30 * c[4] * pow(x, c[0] / 2)) + 60 * pow(2 * x / M_PI, c[0]) * log(2 * x / M_PI)) / (60 * den) + log(den));
+    double dFdc5 = e / x / (pow(den, 1 / (2 * c[0])));
     den = pow(den, 1 / (2 * c[0]) + 1);
     pre = -e * pre / (den * 2 * c[0]);
     double dFdc1 = pre * pow(x, c[0] / 5);
@@ -30,12 +31,12 @@ double BesselK1::besselK1_grad(const double x)
     double dFdc3 = pre * pow(x, c[0] / 3);
     double dFdc4 = pre * pow(x, c[0] / 2);
 
-    res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4};
-    
+    res = {dFdc0, dFdc1, dFdc2, dFdc3, dFdc4, dFdc5};
+
     return res[cur_ci];
 }
 
-bool BesselK1::is_valid()
+bool BesselK2::is_valid()
 {
     bool passed = true;
     double den;
@@ -51,10 +52,10 @@ bool BesselK1::is_valid()
     return passed;
 }
 
-double BesselK1::operator()(const double x)
+double BesselK2::operator()(const double x)
 {
-    double exact = besselK1_exact(x);
-    double approx = besselK1_appr(x);
+    double exact = besselK2_exact(x);
+    double approx = besselK2_appr(x);
 
     switch (ot)
     {
@@ -64,7 +65,7 @@ double BesselK1::operator()(const double x)
 
     case gradient:
     {
-        double deriv = besselK1_grad(x);
+        double deriv = besselK2_grad(x);
         return pow(approx / exact - 1., p_value - 1) * deriv / exact;
     }
     default:

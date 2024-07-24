@@ -59,7 +59,7 @@ public:
 
     // does a montecarlo search with N_points and N_loops keeping the best N_new_spaces each time
     template <class FUNC>
-    void repeated_monte_carlo(FUNC &f, const size_t N_points, const size_t N_loops, const size_t N_new_spaces);
+    vec1d repeated_monte_carlo(FUNC &f, const size_t N_points, const size_t N_loops, const size_t N_new_spaces);
 
     template <class FUNC>
     vec1d gradient_descent(FUNC &f, const int coeff = -1);
@@ -155,7 +155,7 @@ void Optimizer::monte_carlo(FUNC &f, const size_t N, const size_t N_new_spaces)
 }
 
 template <class FUNC>
-void Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points, const size_t N_loops, const size_t N_new_spaces)
+vec1d Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points, const size_t N_loops, const size_t N_new_spaces)
 {
     double best_eps = min_epsilon;
     vstring header;
@@ -171,12 +171,13 @@ void Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points, const size_
         data.push_back(min_epsilon);
         save_data(save_file, header, data);
     }
+    return opt_coeffs;
 }
 
 template <class FUNC>
 vec1d Optimizer::gradient_descent(FUNC &f, const int coeff)
 {
-    const double RATE = 0.01, ACCURACY = 1e-3;
+    const double RATE = 0.001, ACCURACY = 1e-4;
     double cur_eps = epsilon(f), old_eps;
     const size_t MAX_IT = 10000;
     size_t CUR_IT = 0;
@@ -201,6 +202,7 @@ vec1d Optimizer::gradient_descent(FUNC &f, const int coeff)
         cur_eps = epsilon(f);
         CUR_IT++;
     } while ((fabs((cur_eps - old_eps) / old_eps) > ACCURACY) && (CUR_IT < MAX_IT) && (cur_eps < old_eps));
+    std::cout << cur_eps << std::endl;
     cur_coeff.push_back(cur_eps);
     save_data(save_file, header, cur_coeff);
     return cur_coeff;

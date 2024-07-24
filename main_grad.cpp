@@ -1,35 +1,36 @@
 #include <iostream>
 #include <memory>
 #include <iomanip>
-#include "functions/besselK1.hpp"
+#include "functions/besselK2.hpp"
 #include "include/integrator.hpp"
 #include "include/optimizer.hpp"
 
 int main()
 {
     clock_t begin_time = clock();
-    std::cout << std::setprecision(4);
-    BesselK1 B1(4);
-    std::unique_ptr<Integrator> I2 = std::make_unique<Integrator>(gauss15, 0., 150.);
-    std::vector<double> lo1 = {1.8, 0, -2, -2, 0};
-    std::vector<double> up1 = {2.2, 2, 2, 2, 2};
-    std::unique_ptr<Optimizer> O2 = std::make_unique<Optimizer>(I2, B1.get_N_coeffs(), lo1, up1, "test.dat");
-    vec1d best_generation(B1.get_N_coeffs()), cur_generation;
-    best_generation.push_back(1e100);
+    srand((unsigned)time(NULL));
 
-    for (size_t i = 0; i < 10; i++)
-    {
-        std::cout << "Generation: " << i << "\n";
-        std::cout << "-------------------------------------\n";
-        O2->repeated_monte_carlo(B1, 1000, 4, 1);
-        cur_generation = O2->gradient_descent(B1);
-        if (cur_generation.back() < best_generation.back())
-        {
-            best_generation = cur_generation;
-        }
-        O2->reset_space();
-        O2->add_space(lo1, up1);
-    }
+    BesselK2 B2(4);
+    std::cout << std::setprecision(4);
+    std::unique_ptr<Integrator> integrator = std::make_unique<Integrator>(gauss15, 0, 200);
+    std::vector<double> lo1 = {0., 0., 0., 0., 0., 0.};
+    std::vector<double> up1 = {0., 0., 0., 0., 0., 0.};
+    std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(integrator, B2.get_N_coeffs(), lo1, up1, "test.dat");
+
+    vec1d cur_generation;
+
+    B2.change_coeff(0, 1.97556);
+    B2.change_coeff(1, 0.273943);
+    B2.change_coeff(2, -0.765224);
+    B2.change_coeff(3, 0.727862);
+    B2.change_coeff(4, 1.40001);
+    B2.change_coeff(5, 2.85774);
+
+    std::cout << O->epsilon(B2) << "\n";
+
+    O->gradient_descent(B2);
+
+    std::cout << O->epsilon(B2) << "\n";
 
     std::cout << "Computation time:\n"
               << float(clock() - begin_time) / CLOCKS_PER_SEC << "\n";
