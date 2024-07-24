@@ -14,7 +14,7 @@ private:
     vstring header;
     double min_epsilon = 1e100;
     size_t N_coeffs;
-    size_t N_bins = 50, N_spaces = 1;
+    size_t N_bins = 10, N_spaces = 1;
     vec2d coefficent_spaces;
     vec2d weights;
     std::vector<double> opt_coeffs;
@@ -58,6 +58,8 @@ public:
     void repeated_monte_carlo(const size_t N_points, const size_t N_loops, const size_t N_new_spaces);
 
     vec1d gradient_descent(const int coeff = -1);
+
+    vec1d descent_best_direction();
 
     ~Optimizer(){};
 };

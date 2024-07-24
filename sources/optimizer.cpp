@@ -258,7 +258,7 @@ void Optimizer::repeated_monte_carlo(const size_t N_points, const size_t N_loops
 
 vec1d Optimizer::gradient_descent(const int coeff)
 {
-    const double RATE = 0.01, ACCURACY = 1e-4;
+    const double RATE = 0.001, ACCURACY = 1e-4;
     double cur_eps = epsilon(), old_eps;
     const size_t MAX_IT = 10000;
     size_t CUR_IT = 0;
@@ -286,4 +286,26 @@ vec1d Optimizer::gradient_descent(const int coeff)
     cur_coeff.push_back(cur_eps);
     save_data(save_file, header, cur_coeff);
     return cur_coeff;
+}
+
+vec1d Optimizer::descent_best_direction()
+{
+    vec1d cur_coeff, best_coeff;
+    double cur_eps, best_eps = epsilon();
+    for (size_t i = 0; i < N_coeffs; i++)
+    {
+        cur_coeff = gradient_descent(i);
+        cur_eps = cur_coeff.back();
+        cur_coeff.pop_back();
+
+        if (cur_eps < best_eps)
+        {
+            best_coeff = cur_coeff;
+            best_eps = cur_eps;
+        }
+        I->F->change_all_coeffs(cur_coeff);
+    }
+    std::cout << best_eps << "\n";
+    I->F->change_all_coeffs(best_coeff);
+    return best_coeff;
 }

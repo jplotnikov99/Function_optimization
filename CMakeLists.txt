@@ -13,6 +13,8 @@ set(include_dir ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_include_directories(sources PRIVATE ${include_dir})
 
-add_executable(main main.cpp)
+add_executable(main_scan main_scan.cpp)
+add_executable(main_grad main_grad.cpp)
 
-target_link_libraries(main PRIVATE sources)
+target_link_libraries(main_scan PRIVATE sources)
+target_link_libraries(main_grad PRIVATE sources)
