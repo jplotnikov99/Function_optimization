@@ -17,9 +17,9 @@ public:
         }
     };
 
-    double besselK2_exact(const double x);
-    double besselK2_appr(const double x);
-    double besselK2_grad(const double x);
+    double exact(const double x);
+    double approx(const double x);
+    double gradient(const double x);
     bool is_valid();
 
     double operator()(const double x);

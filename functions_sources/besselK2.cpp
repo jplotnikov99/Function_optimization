@@ -1,17 +1,17 @@
 #include "besselK2.hpp"
 
-double BesselK2::besselK2_exact(const double x)
+double BesselK2::exact(const double x)
 {
     return std::cyl_bessel_k(2, x);
 }
 
-double BesselK2::besselK2_appr(const double x)
+double BesselK2::approx(const double x)
 {
     return exp(-x) * (1 + c[5] / x + 2 / (x * x)) /
            pow((c[1] * pow(x, c[0] / 5) + c[2] * pow(x, c[0] / 4) + c[3] * pow(x, c[0] / 3) + c[4] * pow(x, c[0] / 2) + pow(2 * x / M_PI, c[0]) + 1), 1 / (2 * c[0]));
 }
 
-double BesselK2::besselK2_grad(const double x)
+double BesselK2::gradient(const double x)
 {
     vec1d res;
     vec1d temp;
@@ -54,19 +54,19 @@ bool BesselK2::is_valid()
 
 double BesselK2::operator()(const double x)
 {
-    double exact = besselK2_exact(x);
-    double approx = besselK2_appr(x);
+    double ex = exact(x);
+    double ap = approx(x);
 
     switch (ot)
     {
-    case result:
-        return pow(fabs(approx / exact - 1), p_value);
+    case Output_type::result:
+        return pow(fabs(ap / ex - 1), p_value);
         break;
 
-    case gradient:
+    case Output_type::gradient:
     {
-        double deriv = besselK2_grad(x);
-        return pow(approx / exact - 1., p_value - 1) * deriv / exact;
+        double deriv = gradient(x);
+        return pow(ap / ex - 1., p_value - 1) * deriv / ex;
     }
     default:
         exit(1);
