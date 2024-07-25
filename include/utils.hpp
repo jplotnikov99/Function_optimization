@@ -9,7 +9,11 @@
 #define STR(a) #a
 
 extern bool first_save;
-
+enum Output_type
+{
+    result,
+    gradient
+};
 typedef std::vector<double> vec1d;
 typedef std::vector<vec1d> vec2d;
 typedef std::vector<std::string> vstring;
