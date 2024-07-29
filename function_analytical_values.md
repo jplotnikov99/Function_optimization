@@ -5,7 +5,7 @@
 | $D_0(x=0)$ | $2$ | $1$ | Yes | 
 | $D_1(x=0)$ | $-2 v_w$ | $-v_w$ | Yes |
 | $D_2(x=0)$| $\frac{2 \left(v_w \left(2 v_w^2-1\right)+\left(v_w^2-1\right){}^2 \tanh ^{-1}\left(v_w\right)\right)}{v_w^3}$ | $\frac{v_w \left(2 v_w^2-1\right)+\left(v_w^2-1\right){}^2 \tanh ^{-1}\left(v_w\right)}{v_w^3}$ | Yes |
-| $Q_1(x=0)$| $-\frac{3x}{2\pi\gamma_wm^2}$ |$-\frac{3 \sqrt{1-v_w^2}}{\pi ^2 T^2}$| Yes |
+| $Q_1(x=0)$| $-\frac{3x}{2\pi\gamma_w m^2}$ |$-\frac{3x^2}{2\pi^2\gamma_w m^2}$| Yes |
 | $Q_2(x=0)$| $\frac{1}{x}$ const |  const | Yes |
 | $Q^e_1(x=0)$| const | const | Yes  |
 | $Q^e_2(x=0)$| const | const | Yes |
