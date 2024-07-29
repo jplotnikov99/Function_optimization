@@ -1,6 +1,15 @@
 #pragma once
+
 #include <iostream>
+#include <memory>
+#include <unordered_map>
 #include "../include/utils.hpp"
+
+enum Particle_type
+{
+    fermion,
+    boson
+};
 
 class Function
 {

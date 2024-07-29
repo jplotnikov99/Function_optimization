@@ -22,7 +22,7 @@ private:
 
 public:
     Optimizer(std::unique_ptr<Integrator> &Inte, const size_t N, const vec1d &lower, const vec1d &upper,
-               const std::string file_name);
+              const std::string file_name);
 
     vec1d get_opt_coeffs();
 
@@ -158,7 +158,6 @@ template <class FUNC>
 vec1d Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points, const size_t N_loops, const size_t N_new_spaces)
 {
     double best_eps = min_epsilon;
-    vstring header;
 
     for (size_t i = 0; i < N_loops; i++)
     {
@@ -177,7 +176,7 @@ vec1d Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points, const size
 template <class FUNC>
 vec1d Optimizer::gradient_descent(FUNC &f, const int coeff)
 {
-    const double RATE = 0.001, ACCURACY = 1e-4;
+    const double RATE = 0.00001, ACCURACY = 1e-5;
     double cur_eps = epsilon(f), old_eps;
     const size_t MAX_IT = 10000;
     size_t CUR_IT = 0;
@@ -202,7 +201,7 @@ vec1d Optimizer::gradient_descent(FUNC &f, const int coeff)
         cur_eps = epsilon(f);
         CUR_IT++;
     } while ((fabs((cur_eps - old_eps) / old_eps) > ACCURACY) && (CUR_IT < MAX_IT) && (cur_eps < old_eps));
-    std::cout << cur_eps << std::endl;
+    std::cout << "After gradient descent: " << cur_eps << "\n";
     cur_coeff.push_back(cur_eps);
     save_data(save_file, header, cur_coeff);
     return cur_coeff;
