@@ -168,7 +168,7 @@ vec1d Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points,
 
 template <class FUNC>
 vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
-    const double RATE = 0.00001, ACCURACY = 1e-5;
+    const double RATE = 0.0001, ACCURACY = 1e-4;
     double cur_eps = epsilon(f), old_eps;
     const size_t MAX_IT = 10000;
     size_t CUR_IT = 0;
