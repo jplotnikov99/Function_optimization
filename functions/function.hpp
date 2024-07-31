@@ -3,17 +3,13 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+
 #include "../include/utils.hpp"
 
-enum Particle_type
-{
-    fermion,
-    boson
-};
+enum Particle_type { fermion, boson };
 
-class Function
-{
-public:
+class Function {
+   public:
     Output_type ot = result;
     size_t p_value;
     size_t N_coeffs;

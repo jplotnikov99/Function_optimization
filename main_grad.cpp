@@ -1,21 +1,23 @@
+#include <iomanip>
 #include <iostream>
 #include <memory>
-#include <iomanip>
+
 #include "functions/besselK2.hpp"
 #include "include/integrator.hpp"
 #include "include/optimizer.hpp"
 
-int main()
-{
+int main() {
     clock_t begin_time = clock();
     srand((unsigned)time(NULL));
 
     BesselK2 B2(4);
     std::cout << std::setprecision(4);
-    std::unique_ptr<Integrator> integrator = std::make_unique<Integrator>(gauss15, 0, 200);
+    std::unique_ptr<Integrator> integrator =
+        std::make_unique<Integrator>(gauss15, 0, 200);
     std::vector<double> lo1 = {0., 0., 0., 0., 0., 0.};
     std::vector<double> up1 = {0., 0., 0., 0., 0., 0.};
-    std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(integrator, B2.get_N_coeffs(), lo1, up1, "test.dat");
+    std::unique_ptr<Optimizer> O = std::make_unique<Optimizer>(
+        integrator, B2.get_N_coeffs(), lo1, up1, "test.dat");
 
     vec1d cur_generation;
 

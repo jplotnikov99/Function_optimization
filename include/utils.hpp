@@ -1,19 +1,15 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <cmath>
 #include <cassert>
+#include <cmath>
+#include <fstream>
+#include <iostream>
 #include <vector>
 
 #define STR(a) #a
 
 extern bool first_save;
-enum Output_type
-{
-    result,
-    gradient
-};
+enum Output_type { result, gradient };
 typedef std::vector<double> vec1d;
 typedef std::vector<vec1d> vec2d;
 typedef std::vector<std::string> vstring;
@@ -30,4 +26,5 @@ vec1d operator/(const vec1d a, const double b);
 
 double vabs(const vec1d &a);
 
-void save_data(const std::string &output_file, const vstring &header, const vec1d &data);
+void save_data(const std::string &output_file, const vstring &header,
+               const vec1d &data);

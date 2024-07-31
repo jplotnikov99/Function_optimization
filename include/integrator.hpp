@@ -69,7 +69,7 @@ double Integrator::adap_gauss_kronrod_15(FUNC &f, double l, double r, const doub
     }
     I2 = h * (0.129484966168869693270611432679082 * (y[1] + y[13]) + 0.279705391489276667901467771423780 * (y[3] + y[11]) + 0.381830050505118944950369775488975 * (y[5] + y[9]) + 0.417959183673469387755102040816327 * y[7]);
 
-    if (fabs((I1 - I2)) < err * fabs(appr))
+    if (std::abs((I1 - I2)) < err * std::abs(appr))
     {
         return I1;
     }
