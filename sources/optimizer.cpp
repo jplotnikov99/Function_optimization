@@ -1,6 +1,6 @@
 #include "optimizer.hpp"
 
-Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const size_t N,
+Optimizer::Optimizer(std::unique_ptr<Eps> &epsi, const size_t N,
                      const vec1d &lower, const vec1d &upper,
                      const std::string file_name) {
     save_file = file_name;
@@ -10,7 +10,7 @@ Optimizer::Optimizer(std::unique_ptr<Integrator> &inte, const size_t N,
     }
     header.push_back("eps");
 
-    I = std::move(inte);
+    E = std::move(epsi);
     assert(N_coeffs == lower.size());
     assert(N_coeffs == upper.size());
 

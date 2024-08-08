@@ -5,12 +5,12 @@
 #include <memory>
 #include <vector>
 
-#include "integrator.hpp"
 #include "utils.hpp"
+#include "epsilon.hpp"
 
 class Optimizer {
    private:
-    std::unique_ptr<Integrator> I;
+    std::unique_ptr<Eps> E;
     std::string save_file;
     vstring header;
     double min_epsilon = 1e100;
@@ -21,7 +21,7 @@ class Optimizer {
     std::vector<double> opt_coeffs;
 
    public:
-    Optimizer(std::unique_ptr<Integrator> &Inte, const size_t N,
+    Optimizer(std::unique_ptr<Eps> &epsi, const size_t N,
               const vec1d &lower, const vec1d &upper,
               const std::string file_name);
 
@@ -50,11 +50,6 @@ class Optimizer {
     // makes new search spaces with grids that have the smallest weight
     void make_new_spaces(const vec2d &grids);
 
-    template <class FUNC>
-    double epsilon(FUNC &f);
-
-    template <class FUNC>
-    vec1d grad_epsilon(FUNC &f, const int coeff = -1);
     double get_min_epsilon();
 
     // returns the best N_new_spaces bins for the coefficient and their epsilon
@@ -89,32 +84,6 @@ size_t Optimizer::randomize_coeffs(FUNC &f) {
 }
 
 template <class FUNC>
-double Optimizer::epsilon(FUNC &f) {
-    f.switch_to_res();
-    double p = f.get_p_value();
-    return pow(I->integrate(f), 1 / p);
-}
-
-template <class FUNC>
-vec1d Optimizer::grad_epsilon(FUNC &f, const int coeff) {
-    vec1d res;
-    double p = f.get_p_value();
-    f.switch_to_res();
-    double outer = pow(I->integrate(f), 1 / p - 1);
-    f.switch_to_grad();
-
-    if (coeff != -1) {
-        f.select_cur_ci((size_t)coeff);
-        return {outer * I->integrate(f)};
-    }
-    for (size_t i = 0; i < N_coeffs; i++) {
-        f.select_cur_ci((size_t)i);
-        res.push_back(I->integrate(f));
-    }
-    return outer * res;
-}
-
-template <class FUNC>
 void Optimizer::monte_carlo(FUNC &f, const size_t N,
                             const size_t N_new_spaces) {
     vec2d res(N_new_spaces, vec1d(N_coeffs + 2, 1e100));
@@ -125,7 +94,7 @@ void Optimizer::monte_carlo(FUNC &f, const size_t N,
         size_t space = randomize_coeffs(f);
         if (f.is_valid()) {
             cur_coeffs = f.get_coeffs();
-            cur_epsilon = epsilon(f);
+            cur_epsilon = E->epsilon(f);
             cur_weight = set_weight(space, cur_coeffs, cur_epsilon);
             if (cur_epsilon < min_epsilon) {
                 opt_coeffs = cur_coeffs;
@@ -169,14 +138,14 @@ vec1d Optimizer::repeated_monte_carlo(FUNC &f, const size_t N_points,
 template <class FUNC>
 vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
     const double RATE = 0.0001, ACCURACY = 1e-4;
-    double cur_eps = epsilon(f), old_eps;
+    double cur_eps = E->epsilon(f), old_eps;
     const size_t MAX_IT = 10000;
     size_t CUR_IT = 0;
     vec1d cur_coeff, grad;
     do {
         old_eps = cur_eps;
         cur_coeff = f.get_coeffs();
-        grad = grad_epsilon(f, coeff);
+        grad = E->grad_epsilon(f, coeff);
 
         if (coeff != -1) {
             f.change_coeff(coeff, cur_coeff[coeff] - RATE * grad[0]);
@@ -185,7 +154,7 @@ vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
                 f.change_all_coeffs(cur_coeff - RATE * grad);
             }
         }
-        cur_eps = epsilon(f);
+        cur_eps = E->epsilon(f);
         CUR_IT++;
     } while ((fabs((cur_eps - old_eps) / old_eps) > ACCURACY) &&
              (CUR_IT < MAX_IT) && (cur_eps < old_eps));
@@ -198,7 +167,7 @@ vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
 template <class FUNC>
 vec1d Optimizer::descent_best_direction(FUNC &f) {
     vec1d cur_coeff, best_coeff;
-    double cur_eps, best_eps = epsilon(f);
+    double cur_eps, best_eps = E->epsilon(f);
     for (size_t i = 0; i < N_coeffs; i++) {
         cur_coeff = gradient_descent(f, i);
         cur_eps = cur_coeff.back();
