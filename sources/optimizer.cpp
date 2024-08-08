@@ -10,7 +10,7 @@ Optimizer::Optimizer(std::unique_ptr<Eps> &epsi, const size_t N,
     }
     header.push_back("eps");
 
-    E = std::move(epsi);
+    eps = std::move(epsi);
     assert(N_coeffs == lower.size());
     assert(N_coeffs == upper.size());
 
