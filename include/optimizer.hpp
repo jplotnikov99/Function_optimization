@@ -170,7 +170,7 @@ template <class FUNC>
 vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
     const double RATE = 0.0001, ACCURACY = 1e-4;
     double cur_eps = epsilon(f), old_eps;
-    const size_t MAX_IT = 10000;
+    const size_t MAX_IT = 1000;
     size_t CUR_IT = 0;
     vec1d cur_coeff, grad;
     do {
@@ -181,9 +181,7 @@ vec1d Optimizer::gradient_descent(FUNC &f, const int coeff) {
         if (coeff != -1) {
             f.change_coeff(coeff, cur_coeff[coeff] - RATE * grad[0]);
         } else {
-            for (size_t i = 0; i < N_coeffs; i++) {
-                f.change_all_coeffs(cur_coeff - RATE * grad);
-            }
+            f.change_all_coeffs(cur_coeff - RATE * grad);
         }
         cur_eps = epsilon(f);
         CUR_IT++;

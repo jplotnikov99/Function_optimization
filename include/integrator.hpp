@@ -15,9 +15,20 @@ class Integrator {
     double kronrod_61(FUNC &f, const double l, const double r);
 
     template <class FUNC>
-    double adap_gauss_kronrod_15(FUNC &f, double l, double r, const double appr,
-                                 const size_t depth = 0,
-                                 const double err = 1e-10);
+    double adap_gauss_kronrod_15(FUNC &f, const double l, const double r,
+                                 const double appr, const double err = 1e-10,
+                                 const size_t depth = 0);
+
+    double simpson_est(const double l, const double r, const double *f) {
+        return (r - l) / 24 *
+               (f[0] + f[9] + 3 * (f[1] + f[2] + f[4] + f[5] + f[7] + f[8]) +
+                2 * (f[3] * f[6]));
+    }
+
+    template <class FUNC>
+    double adap_simpson38(FUNC &f, const double l, const double r, double *f0,
+                          const double appr, const double err = 1e-10,
+                          const size_t depth = 0);
 
    public:
     Integrator(const int_method m, const double xi, const double xu)
@@ -46,9 +57,9 @@ double Integrator::kronrod_61(FUNC &f, const double l, const double r) {
 }
 
 template <class FUNC>
-double Integrator::adap_gauss_kronrod_15(FUNC &f, double l, double r,
-                                         const double appr, const size_t depth,
-                                         const double err) {
+double Integrator::adap_gauss_kronrod_15(FUNC &f, const double l,
+                                         const double r, const double appr,
+                                         const double err, const size_t depth) {
     double I1, I2, y[15];
     double h = (r - l) / 2;
     for (int i = 0; i < 15; i++) {
@@ -74,8 +85,34 @@ double Integrator::adap_gauss_kronrod_15(FUNC &f, double l, double r,
         return I1;
     }
     double m = (l + r) / 2;
-    return adap_gauss_kronrod_15(f, l, m, appr, depth + 1, err) +
-           adap_gauss_kronrod_15(f, m, r, appr, depth + 1, err);
+    return adap_gauss_kronrod_15(f, l, m, appr, err, depth + 1) +
+           adap_gauss_kronrod_15(f, m, r, appr, err, depth + 1);
+}
+
+template <class FUNC>
+double Integrator::adap_simpson38(FUNC &f, const double l, const double r,
+                                  double *f0, const double appr,
+                                  const double err, const size_t depth) {
+    double I1, I2, f1[4];
+    double m = (r + l) / 2.;
+    double h = (r - l) / 8.;
+    double Ia = h * (f0[0] + 3 * f0[1] + 3 * f0[2] + f0[3]);
+    f1[0] = f(m);
+    f1[1] = f0[2];
+    f1[2] = f((l + 5 * r) / 6);
+    f1[3] = f0[3];
+    f0[3] = f1[0];
+    f0[2] = f0[1];
+    f0[1] = f((5 * l + r) / 6);
+    I1 = h / 2 * (f0[0] + 3 * f0[1] + 3 * f0[2] + f0[3]);
+    I2 = h / 2 * (f1[0] + 3 * f1[1] + 3 * f1[2] + f1[3]);
+    double Ib = I1 + I2;
+
+    if ((std::abs(Ia - Ib) < err * std::abs(appr)) || (depth > 16)) {
+        return Ib;
+    }
+    return adap_simpson38(f, l, m, f0, appr, err, depth + 1) +
+           adap_simpson38(f, m, r, f1, appr, err, depth + 1);
 }
 
 template <class FUNC>
@@ -85,8 +122,18 @@ double Integrator::integrate(FUNC &f, const double err) {
             double h = x_upper - x_lower;
             double approx = kronrod_61(f, x_lower, x_lower + h * 1e-3);
             approx += kronrod_61(f, x_lower + h * 1e-3, x_upper);
-            return adap_gauss_kronrod_15(f, x_lower, x_upper, approx);
+            return adap_gauss_kronrod_15(f, x_lower, x_upper, approx, err);
         } break;
+        case simps38: {
+            double f_approx[10];
+            double dx = (x_upper - x_lower) / 9.;
+            for (size_t i = 0; i < 10; i++) {
+                f_approx[i] = f(x_lower + dx * (double)i);
+            }
+            double approx = simpson_est(x_lower, x_upper, f_approx);
+            double f0[4] = {f_approx[0], f_approx[3], f_approx[6], f_approx[9]};
+            return adap_simpson38(f, x_lower, x_upper, f0, approx, err);
+        }
 
         default:
             exit(1);
