@@ -86,7 +86,7 @@ vec1d Optimizer::set_weight(const size_t space, const vec1d &constants,
     size_t i2;
 
     for (size_t i = 0; i < N_coeffs; i++) {
-        // index = (xi-x0)*Nb/(xf-xi) - 1
+        // index = ceil((xi-x0)*Nb/(xf-xi)) - 1
         i2 = std::ceil((constants.at(i) - coefficent_spaces[2 * space][i]) *
                        (double)N_bins /
                        (coefficent_spaces[2 * space + 1][i] -
