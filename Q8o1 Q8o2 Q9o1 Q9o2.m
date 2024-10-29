@@ -723,82 +723,75 @@ Q9o2highX[x_,vw_,T_]=-(1/(67108864 Sqrt[2] \[Pi]^(3/2) T^4 x^8 Sqrt[x-vw^2 x]))3
 
 
 (* ::Section:: *)
-(*Q9o1 x \[RightArrow] 0 for fermions*)
+(*Pad\[EAcute] Approximations*)
 
 
-$Assumptions= {x>0&&z>0&&1>y>-1&&1>vw>0}
-temp=x^3 Q9o1int[x,-1,vw,T]//.{Re[x_]->x,w->x+z,Abs[x_]->x}
-function[z_]=z^2 x;
-temp2 = function'[z](temp/.{z->function[z]})//Simplify
-asymp = Asymptotic[temp2,x->0]//Simplify
-plot=Plot[NIntegrate[Asymptotic[asymp/.T->1,vw->0],{y,-1,1},{z,0,Infinity}],{vw,0,1},PlotRange->All]
+(* ::Subsection:: *)
+(*Q8o1*)
 
 
-(* ::Subsubsection:: *)
-(*Limit at vw = 0*)
+(* ::Code:: *)
+(*(*This only needs to be ran once to generate the files. Already done.*)*)
+(*DataQ8o1fermion = ParallelTable[{x,vw, Q8o1[x,1,vw,1]},{x,Table[10^i,{i,-3,1,0.05}]},{vw,0.01,0.99,0.025}];*)
+(*Export[NotebookDirectory[]<>"Q_pade/q8e1_fermion.m",DataQ8o1fermion];*)
+(*(*This only needs to be ran once to generate the files. Already done.*)*)
 
 
-IntOverY = Integrate[Asymptotic[asymp,vw->0]//Simplify,{y,-1,1}]
-Q9o1lowxlowvw[x_,T_,vw_]=Integrate[IntOverY,{z,0,Infinity}]
+(* ::Code:: *)
+(*DataQ8o1fermion=Import[NotebookDirectory[]<>"Q_pade/q8e1_fermion.m"];*)
+(*Q8o1Flat = (DataQ8o1fermion//N//Flatten[#,1]&);*)
 
 
-(* ::Subsubsection:: *)
-(*Limit at vw = 1*)
+(* ::Code:: *)
+(*Q8o1DataPlot=ListPlot3D[Q8o1Flat,PlotRange->All,ImageSize->600, AxesLabel -> {"x", "vw","Q8o1"},BaseStyle -> {FontWeight -> "Bold", FontSize -> 20},ScalingFunctions -> {"Log", Identity, Identity}]*)
 
 
-IntOverY = Integrate[Asymptotic[asymp,vw->1]//Simplify,{y,-1,1}]
-Q9o1lowxhighvw[x_,T_,vw_]=Integrate[IntOverY,{z,0,Infinity}]
-
-
-guess = ((vw)(Q9o1lowxhighvw[0.00001,1,vw])(a + b vw + c vw ^2 + d vw^3 + f vw^4))
-Q9o1lowx[x_,T_,vw_]= (guess/.FindFit[plot[[1,1,1,3,1,2,1]], guess,{a,b,c,d,e,f},vw])/(x^3 T^4)
-
-
-Show[plot,Plot[{Q9o1lowxhighvw[0.00001,1,vw]},{vw,0,1},PlotStyle->Orange],Plot[0.00001^3 Q9o1lowx[0.00001,1,vw],{vw,0,1},PlotStyle->Green]]
-
-
-Q9o1[0.001,-1,0.2,1]/Q9o1lowx[0.001,1,0.2]-1
-Q9o1[0.0001,-1,0.5,1]/Q9o1lowx[0.0001,1,0.5]-1
-Q9o1[0.00001,-1,0.99,1]/Q9o1lowx[0.00001,1,0.99]-1
-
-
-(* ::Section:: *)
-(*Q9o2 x \[RightArrow] 0 for fermions*)
-
-
-$Assumptions= {x>0&&z>0&&1>y>-1&&1>vw>0}
-temp=x^3 Q9o2int[x,-1,vw,T]//.{Re[x_]->x,w->x+z,Abs[x_]->x}
-function[z_]=z^2 x;
-temp2 = function'[z](temp/.{z->function[z]})//Simplify
-asymp = Asymptotic[temp2,x->0]//Simplify
-plot=Plot[NIntegrate[Asymptotic[asymp/.T->1,vw->0],{y,-1,1},{z,0,Infinity}],{vw,0,1},PlotRange->All]
+(* ::Code:: *)
+(*Q8o1FlatClean=Select[Q8o1Flat,If[#[[1]]<0.01 && #[[2]]>0.4 && #[[3]]>-0.05,False,True]&];*)
+(*Q8o1DataPlotClean=ListPlot3D[Q8o1FlatClean,PlotRange->All,ImageSize->1100, AxesLabel -> {"x", "vw","Q8o1"},BaseStyle -> {FontWeight -> "Bold", FontSize -> 20},ScalingFunctions -> {"Log", Identity, Identity}]*)
 
 
 (* ::Subsubsection:: *)
-(*Limit at vw = 0*)
+(*Model 1*)
 
 
-IntOverY = Integrate[Asymptotic[asymp,vw->0]//Simplify,{y,-1,1}]
-Q9o2lowxlowvw[x_,T_,vw_]=Integrate[IntOverY,{z,0,Infinity}]
+(* ::Code:: *)
+(*(*gl =  function that couples x -> 0 approximation*)*)
+(*gl[x_,vw_]=(1 + x l + ll x^2 + llllll x^3 + u x^4)/(1 + lll x+ lllll x^2 + uu x^3)  Exp[- llll vw x - lllll  x^2];*)
+(*(*gh =  function that couples x -> \[Infinity] *)*)
+(*gh[x_,vw_]= ((h x^(11/2) + hh x^6 +  Abs[hhh] x^8)/(Abs[hhh] x^8+hhhhh)) ;*)
 
 
-(* ::Subsubsection:: *)
-(*Limit at vw = 1*)
+(* ::Code:: *)
+(*variables = DeleteCases[DeleteDuplicates[Join[Variables@Level[gl[x,vw], {-1}],Variables@Level[gh[x,vw], {-1}]]], Alternatives @@ {x, vw}];*)
+(*func = Q8o1lowX[x,vw,1]gl[x,vw] + Q8o1highX[x,vw,1]gh[x,vw];*)
+(*fit=NonlinearModelFit[Q8o1FlatClean,func,variables,{x,vw}, MaxIterations->100]*)
+(**)
+(*fit["BestFitParameters"]//TableForm;*)
+(**)
+(*Print["Limits of gl\t", Limit[gl[x,vw]/.fit["BestFitParameters"],x->0], "\t", Limit[gl[x,vw]/.fit["BestFitParameters"],x->Infinity], "\t(should be 1 0)"]*)
+(**)
+(*Print["Limits of gh\t", Limit[gh[x,vw]/.fit["BestFitParameters"],x->0], "\t", Limit[gh[x,vw]/.fit["BestFitParameters"],x->Infinity], "\t(should be 0 1)"]*)
+(**)
+(**)
+(*Plot[{Evaluate[gl[x,0.5]/.fit["BestFitParameters"]],Evaluate[gh[x,0.5]/.fit["BestFitParameters"]]},{x,0,10},PlotRange->All]*)
+(**)
+(*Q8o1FlatCleanErrorRelative=Q8o1FlatClean;*)
+(*Q8o1FlatCleanErrorRelative[[All,3]]=Abs[(fit["FitResiduals"]/Q8o1FlatClean[[All,3]])];*)
+(*ListPlot3D[Q8o1FlatCleanErrorRelative,PlotRange->All,ImageSize->1100, AxesLabel -> {"x", "vw","Relative error"},BaseStyle -> {FontWeight -> "Bold", FontSize -> 20},ScalingFunctions -> {"Log", Identity, "Log"}]*)
 
 
-IntOverY = Integrate[Asymptotic[asymp,vw->1]//Simplify,{y,-1,1}]
-Q9o2lowxhighvw[x_,T_,vw_]=Integrate[IntOverY,{z,0,Infinity}]
+(* ::Code:: *)
+(*Q8o1FlatCleanError=Q8o1FlatClean;*)
+(*Q8o1FlatCleanError[[All,3]]=Abs[(fit["FitResiduals"])];*)
+(*ListPlot3D[Q8o1FlatCleanError,PlotRange->All,ImageSize->1100, AxesLabel -> {"x", "vw","Absolute error"},BaseStyle -> {FontWeight -> "Bold", FontSize -> 20},ScalingFunctions -> {"Log", Identity, "Log"}]*)
 
 
-Q9o2lowxlowvw[0.00001,1,vw]
+(* ::Code:: *)
+(*Q8o1FlatCleanError=Q8o1FlatClean;*)
+(*Q8o1FlatCleanError[[All,3]]=(fit["FitResiduals"]);*)
+(*ListPlot3D[Q8o1FlatCleanError,PlotRange->All,ImageSize->1100, AxesLabel -> {"x", "vw","Absolute error"},BaseStyle -> {FontWeight -> "Bold", FontSize -> 20},ScalingFunctions -> {"Log", Identity, Identity}]*)
 
 
-guess = Q9o2lowxlowvw[0.00001,1,vw] (a+b vw + c vw^2 + h vw^3)/(d+e vw + g vw^2) Q9o2lowxhighvw[0.00001,1,vw]
-Q9o2lowx[x_,T_,vw_]= (guess/.FindFit[plot[[1,1,1,3,1,2,1]], guess,{a,b,c,d,e,g,h},vw])/(x^3 T^4)
-Show[plot,Plot[{Q9o2lowxlowvw[0.00001,1,vw],Q9o2lowxhighvw[0.00001,1,vw]},{vw,0,1},PlotStyle->Orange,PlotRange->{0,0.04}],Plot[0.00001^3 Q9o2lowx[0.00001,1,vw],{vw,0,1},PlotStyle->Directive[Purple,Dashed]]]
-
-
-Q9o2[0.001,-1,0.2,1]/Q9o2lowx[0.001,1,0.2]-1
-Q9o2[0.0001,-1,0.5,1]/Q9o2lowx[0.0001,1,0.5]-1
-Q9o2[0.00001,-1,0.99,1]/Q9o2lowx[0.00001,1,0.99]-1
-
+(* ::Code:: *)
+(*Show[Q8o1DataPlotClean,Plot3D[fit//Normal,{x,Q8o1Flat[[1,1]], Q8o1Flat[[-1,1]]},{vw,0,1},ImageSize->1100,PlotRange->All,ScalingFunctions -> {"Log", Identity, Identity},PlotStyle->Blue]]*)
