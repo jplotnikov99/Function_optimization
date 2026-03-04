@@ -98,7 +98,6 @@ vec1d Optimizer::set_weight(const size_t space, const vec1d &constants,
     }
     res[N_coeffs] = space;
     res[N_coeffs + 1] = eps;
-
     return res;
 }
 
@@ -108,8 +107,8 @@ void Optimizer::make_new_spaces(const vec2d &grids) {
     double xN, x0, del;
     for (auto it : grids) {
         for (size_t i = 0; i < N_coeffs; i++) {
-            xN = coefficent_spaces[2 * it[N_coeffs + 1] + 1][i];
-            x0 = coefficent_spaces[2 * it[N_coeffs + 1]][i];
+            xN = coefficent_spaces[2 * it[N_coeffs] + 1][i];
+            x0 = coefficent_spaces[2 * it[N_coeffs]][i];
             del = (xN - x0) / N_bins;
             lo.push_back(x0 + it[i] * del);
             up.push_back(x0 + (it[i] + 1) * del);

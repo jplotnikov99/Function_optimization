@@ -75,7 +75,7 @@ Q9o2int[x_,s_,vw_,T_]:=1/4(Re[singlegridint[0,4,1,1,s,vw,x,T]-singlegridint[0,3,
 (*Q8o1lowX[x_,vw_,T_] = (Re[Integrate[AsymptoticIntegrate[temp,{y,-1,1},{x,0,1}],{z,0,Infinity}]]//Simplify)//TrigToExp//ComplexExpand//Refine[#,{vw \[Element] Reals, 1>vw>0}]&//Simplify*)
 
 
-Q8o1lowX[x_,vw_,T_] =(3 vw (-2+x) (2 \[Pi] Sqrt[1-vw^2]-2 vw Log[vw]+vw Log[1-Sqrt[1-vw^2]]+vw Log[1+Sqrt[1-vw^2]]))/(16 \[Pi]^2 T^2);
+Q8o1lowX[x_,vw_,T_] :=(3 vw Sqrt[1-vw^2] (-2+x))/(8 \[Pi] T^2);
 
 
 (* ::Code:: *)
@@ -119,7 +119,6 @@ Q8o1lowX[x_,vw_,T_] =(3 vw (-2+x) (2 \[Pi] Sqrt[1-vw^2]-2 vw Log[vw]+vw Log[1-Sq
 (*temp=temp/.Abs[x_]->x//Simplify;*)
 (*temp=Asymptotic[temp,{x,Infinity,2}];*)
 (*temp2=Integrate[temp,{y,-1,1}]]*)
-(**)
 
 
 (* ::Code:: *)
@@ -158,8 +157,8 @@ Q8o1lowX[x_,vw_,T_] =(3 vw (-2+x) (2 \[Pi] Sqrt[1-vw^2]-2 vw Log[vw]+vw Log[1-Sq
 
 
 (* ::Code:: *)
-(*vwall=0.1;*)
-(*dataQ8o1 = Table[{x,Q8o1[x,1,vwall,1]},{x,0.1,20,0.5}];*)
+(*vwall=0.5;*)
+(*dataQ8o1 = Table[{x,Q8o1[x,1,vwall,1]},{x,0.1,20,0.1}];*)
 
 
 (* ::Code:: *)
@@ -186,15 +185,40 @@ Q8o1lowX[x_,vw_,T_] =(3 vw (-2+x) (2 \[Pi] Sqrt[1-vw^2]-2 vw Log[vw]+vw Log[1-Sq
 (*    {{x, {13},"Approximation"}, Dynamic@Range@Length@plotlist, TogglerBar}]*)
 
 
+regularizer[vw_]:=-6.087376104758189*10^-6(-6996285-38505000 vw^2-62801664 vw^4+209737728 vw^6-118063104 vw^8+27525120 vw^10)(**Exp[-2*x]*);(*Q8o1highX1[0,vw,T]/Q8o1lowX[0,vw,T]*)
+
+
 Q8o1highX[x_,vw_,T_]=(3 E^-x vw (-1+vw^2) (6996285-7416744 x+8 (-3440640 vw^10-12288 vw^8 (-1201+40 x)-768 vw^6 (34137+16 x (-137+8 x))-32 vw^4 (-245319+8 x (2385+16 x (-45+8 x)))+32 x^2 (11241+8 x (-399+16 x (3+8 x)))+vw^2 (4813125-32 x (-20211+8 x (2073+16 x (-41+8 x)))))))/(262144 \[Pi]^(3/2) T^2 Sqrt[2-2 vw^2] x^(11/2));
+Q8o1highX1[x_,vw_,T_]:=(3 E^-x vw Sqrt[1-vw^2])/(262144 Sqrt[2] \[Pi]^(3/2) T^2*Sqrt[x^11+regularizer[vw]^2])*(-6996285-38505000 vw^2-62801664 vw^4+209737728 vw^6-118063104 vw^8+27525120 vw^10+(7416744-5174016 vw^2+4884480 vw^4-13467648 vw^6+3932160 vw^8) x+(-2877696+4245504 vw^2-1474560 vw^4+786432 vw^6) x^2+(817152-1343488 vw^2+262144 vw^4) x^3+(-98304+262144 vw^2) x^4-262144 x^5)
 
 
 (* ::Code:: *)
-(*StringReplace[ToString[Q8o1highX[x,vw,T]/.{E^x_->exp[x]}//Simplify//CForm],{"Power(E,x)"->"exp(x)","Power"->"pow","Sqrt"->"sqrt"}]*)
+(*Show[Plot[{Q8o1highX[x,vwall,1],Q8o1highX1[x,vwall,1],Q8o1lowX[x,vwall,1]},{x,0.001,10},PlotRange->{{0.001,10},{-0.1,0.1}}],ListPlot[dataQ8o1,PlotStyle->Red,ImageSize->800,PlotLegends->{"Numerical"},PlotMarkers->Style[\[FilledCircle],10],PlotRange->All]]*)
 
 
-(* ::Code:: *)
-(*Show[Plot[{Q8o1highX[x,vwall,1],Q8o1lowX[x,vwall,1]},{x,0.001,10}],ListPlot[dataQ8o1,PlotStyle->Red,ImageSize->800,PlotLegends->{"Numerical"},PlotMarkers->Style[\[FilledCircle],20]]]*)
+Q8o1errorhigh=Table[{dataQ8o1[[i,1]],Abs[Q8o1highX[dataQ8o1[[i,1]],vwall,1]/dataQ8o1[[i,2]]-1]},{i,Length[dataQ8o1]}];
+Q8o1errorhigh1=Table[{dataQ8o1[[i,1]],Abs[Q8o1highX1[dataQ8o1[[i,1]],vwall,1]/dataQ8o1[[i,2]]-1]},{i,Length[dataQ8o1]}];
+
+
+ListLogPlot[{Q8o1errorhigh,Q8o1errorhigh1},PlotRange->{{0.001,20},{10^-6,100000}}]
+
+
+StringReplace[ToString[Q8o1lowX[x,vw,T]/.{E^x_->exp[x]}//Simplify//CForm],{"Power(E,x)"->"exp(x)","Power"->"pow","Sqrt"->"sqrt"}]
+
+
+Q8o1highX1[x,vw,T]
+
+
+test=((-6996285-38505000 vw^2-62801664 vw^4+209737728 vw^6-118063104 vw^8)+(7416744-5174016 vw^2+4884480 vw^4-13467648 vw^6+3932160 vw^8) x+(-2877696+4245504 vw^2-1474560 vw^4+786432 vw^6) x^2+(817152-1343488 vw^2+262144 vw^4) x^3+(-98304+262144 vw^2) x^4-262144 x^5);
+Plot[regularizer[vw],{vw,0,1}]
+
+
+Q8o1highX[x,vw,T];
+Q8o1highX1[x,vw,T]
+
+
+(* ::Input:: *)
+(**)
 
 
 (* ::Section:: *)
